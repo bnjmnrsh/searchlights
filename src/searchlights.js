@@ -14,7 +14,6 @@
  * @done refactor createSrchLtEls() to allow numeric 0 values from data-*
  * @todo refactor the merging of defaults and options into the settings object.
  *
- * @todo Better handeling of tracking where the pointer is on exit and re-enter so searchlights dont fly across screen
  * @todo Better handeling of pointers first appearance on screen (now they sit at 00 untill poiner event.
  *
  * @todo Automatically calculate degrees of seperation for n searchlights
@@ -99,8 +98,12 @@ window.searchLights = (function (options) {
      * Checks if the browser reports supporting mixBlendingMode
      * Adds the class "mixBlendMode" to body if the browser supports it.
      *
-     * Note Safari has partial support, and will return true, though some modes not supported,
-     *  including: hue, saturation, color, and luminosity
+     * A JS based test is nessicary here as IE11 and doesn't support *-blend-modes, and nor does it
+     * support @supports.
+     *
+     * Note Safari has partial support, and will return true, despite not supporting the following:
+     * hue, saturation, color, and luminosity
+     *
      * https://caniuse.com/css-mixblendmode
      *
      * @returns boolean
@@ -111,22 +114,6 @@ window.searchLights = (function (options) {
             'undefined'
         supported ? document.body.classList.add('mix-blend-mode') : ''
         return supported
-    }
-
-    /**
-     * A terse debouce function
-     *
-     * @param {*} fn
-     * @param {*} delay
-     */
-    srchLts.dbnce = (fn, delay = 300) => {
-        let timer
-        return (...args) => {
-            clearTimeout(timer)
-            timer = setTimeout(() => {
-                fn(...args)
-            }, delay)
-        }
     }
 
     /**
@@ -194,6 +181,24 @@ window.searchLights = (function (options) {
             el.style.left = e.pageX + 'px'
             el.style.top = e.pageY + 'px'
         })
+    }
+
+    // srchLts Public API methods
+
+    /**
+     * A terse debouce function
+     *
+     * @param {*} fn
+     * @param {*} delay
+     */
+    srchLts.dbnce = (fn, delay = 300) => {
+        let timer
+        return (...args) => {
+            clearTimeout(timer)
+            timer = setTimeout(() => {
+                fn(...args)
+            }, delay)
+        }
     }
 
     /**
@@ -332,21 +337,14 @@ window.searchLights = (function (options) {
     }
 
     /**
-     * Sets the style property of a provided element so that the cursor is centered by default.
+     * Adjusts the style property of a provided element so that the cursor is centered by default.
      *
      * @param {*} el
      */
     srchLts.centerOnPtr = function (el) {
         if (!isDOM(el)) return
-
-        const dia = parseInt(el.dataset.dia || srchLts.settings.dia)
-        const blur = parseInt(el.dataset.blur || srchLts.settings.blur)
         el.style.transform =
-            'translate( ' +
-            -(dia + blur * 2) / 2 +
-            'px, ' +
-            -(dia + blur * 2) / 2 +
-            'px)'
+            'translate( ' + -el.width / 2 + 'px, ' + -el.height / 2 + 'px)'
     }
 
     /**
