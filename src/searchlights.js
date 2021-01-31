@@ -7,6 +7,8 @@
  * https://davidwalsh.name/add-rules-stylesheets
  * https://gomakethings.com/two-ways-to-set-an-elements-css-with-vanilla-javascript/
  *
+ * @todo make sure the when adding elements to the DOM it is done in such a way as to minimise redraw
+ *
  * @todo Better handeling of pointers first appearance on screen (now they sit at 00 untill poiner event.\
  * @todo Assess if rather then tracking if the mouse leaves body to show/hide, instead if it leaves the 'attach' target with custom event?
  *
@@ -30,8 +32,6 @@
  *
  * @param {*} optons
  */
-
-const { doc } = require('prettier')
 
 window.searchLights = (function (options) {
     ;('use strict')
@@ -170,12 +170,14 @@ window.searchLights = (function (options) {
     /**
      * Set an element's transition in milliseconds
      *
+     * @todo fix incoming number/string issue
+     *
      * @param {*} el
      * @param {*} transition
      */
     const setTiming = function (el, timing = srchLts.settings.transition) {
         // test incoming values
-        if (!isDOM(el) || typeof opacity !== 'number') return
+        // if (!isDOM(el) || typeof opacity !== 'number') return
         el.style.transitionDuration = timing + 'ms'
     }
 
@@ -191,6 +193,62 @@ window.searchLights = (function (options) {
         nodeList.forEach(function (el) {
             el.style.left = e.pageX + 'px'
             el.style.top = e.pageY + 'px'
+        })
+    }
+
+    /**
+     * Create the srchLts.settings object
+     * by combining any provided user options with srchLts.defaults.
+     *
+     * @param {*} opts
+     */
+    const buildSettingsObj = function (opts) {
+        // Allow overrideing of API methods
+        srchLts = Object.assign(srchLts, opts)
+
+        // merge options with defaults
+        srchLts.settings = Object.assign({}, srchLts.defaults, srchLts.options)
+
+        // If the user didn't provide options.ptrEls,
+        // we merge any top level options as new defaults
+        // in the template for making new pointers: srchLts.settings.ptrEls
+        if (opts && opts.options.ptrEls !== undefined) {
+            srchLts.settings.ptrEls.forEach((ptrEl, i) => {
+                ptrEl = Object.assign(ptrEl, opts.options.ptrEls[i])
+            })
+        }
+    }
+
+    /**
+     * Add canvas el to DOM, draw the 2d Context, and apply inline styles.
+     */
+    const assembleSrchLtPtrs = function () {
+        // Attach the pointer elements to the DOM
+        srchLts.ptrs = srchLts.createSrchLtEls(
+            srchLts.settings.ptrEls,
+            srchLts.settings.target
+        )
+
+        // draw each element
+        srchLts.ptrs.forEach(function (el) {
+            if (!isDOM(el)) return
+
+            // create the 2d conext
+            const ctx = srchLts.create2dCtx(el, srchLts)
+
+            // Set element styles
+            srchLts.centerOnPtr(el)
+
+            // assign the styles unless overwridden
+            if (srchLts.useInlineStyles) {
+                setBlending(el, ctx.srchLt.blend)
+                setOpacity(el, ctx.srchLt.opacity)
+                setEasing(el, ctx.srchLt.easing)
+                setTiming(el, ctx.srchLt.timing)
+            }
+
+            // draw the elements
+            srchLts.drawCtx(ctx)
         })
     }
 
@@ -337,9 +395,9 @@ window.searchLights = (function (options) {
      * @param {*} e
      * @param {*} nodeList
      */
-    srchLts.showSrchLts = function (nodeList) {
+    srchLts.showSrchLts = function (e, nodeList) {
         if (!isNodeList(nodeList)) return
-
+        console.log('show')
         nodeList.forEach(function (el) {
             el.style.opacity = el.dataset.opacity || srchLts.settings.opacity
         })
@@ -350,9 +408,8 @@ window.searchLights = (function (options) {
      *
      * @param {*} nodeList
      */
-    srchLts.hideSrchLts = function (nodeList) {
+    srchLts.hideSrchLts = function (e, nodeList) {
         if (!isNodeList(nodeList)) return
-
         nodeList.forEach(function (el) {
             el.style.opacity = '0'
         })
@@ -406,6 +463,7 @@ window.searchLights = (function (options) {
             srchLts.ptrEnterCallbk(e, srchLts)
         }
         document.onpointerleave = (e) => {
+            console.log(srchLts)
             srchLts.hideSrchLts(e, srchLts.ptrs)
             srchLts.ptrLeaveCallbk(e, srchLts)
         }
@@ -446,62 +504,6 @@ window.searchLights = (function (options) {
     }
 
     /**
-     * Create the srchLts.settings object
-     * by combining any provided user options with srchLts.defaults.
-     *
-     * @param {*} opts
-     */
-    const buildSettingsObj = function (opts) {
-        // Allow overrideing of API methods
-        srchLts = Object.assign(srchLts, opts)
-
-        // merge options with defaults
-        srchLts.settings = Object.assign({}, srchLts.defaults, srchLts.options)
-
-        // If the user didn't provide options.ptrEls,
-        // we merge any top level options as new defaults
-        // in the template for making new pointers: srchLts.settings.ptrEls
-        if (opts && opts.options.ptrEls !== undefined) {
-            srchLts.settings.ptrEls.forEach((ptrEl, i) => {
-                ptrEl = Object.assign(ptrEl, opts.options.ptrEls[i])
-            })
-        }
-    }
-
-    /**
-     * Add canvas el to DOM, draw the 2d Context, and apply inline styles.
-     */
-    const assembleSrchLtPtrs = function () {
-        // Attach the pointer elements to the DOM
-        srchLts.ptrs = srchLts.createSrchLtEls(
-            srchLts.settings.ptrEls,
-            srchLts.settings.target
-        )
-
-        // draw each element
-        srchLts.ptrs.forEach(function (el) {
-            if (!isDOM(el)) return
-
-            // create the 2d conext
-            const ctx = srchLts.create2dCtx(el, srchLts)
-
-            // Set element styles
-            srchLts.centerOnPtr(el)
-
-            // assign the styles unless overwridden
-            if (srchLts.useInlineStyles) {
-                setBlending(el, ctx.srchLt.blend)
-                setOpacity(el, ctx.srchLt.opacity)
-                setEasing(el, ctx.srchLt.easing)
-                setTiming(el, ctx.srchLt.timing)
-            }
-
-            // draw the elements
-            srchLts.drawCtx(ctx)
-        })
-    }
-
-    /**
      * Public init function
      *
      * @param {*} options
@@ -529,72 +531,3 @@ window.searchLights = (function (options) {
     // make the srcLts our public API
     return srchLts
 })()
-
-searchLights.init()
-
-// Test Suite
-const test = {
-    options: {
-        opacity: 0.8,
-        blend: 'difference',
-        dia: 400,
-        blur: 6,
-    },
-}
-
-test.options.ptrEls = [
-    {
-        classes: ['test', 'blue'],
-        color: 'rgb(33, 27, 27)',
-        dia: test.options.dia,
-        blur: 0.1,
-        opacity: test.options.opacity,
-        blend: 'screen',
-        easing: 'ease-in',
-        timing: 20,
-    },
-    {
-        classes: ['red'],
-        color: 'rgb(15,30,200)',
-        dia: 300,
-        blur: -2,
-        blend: test.options.blend,
-        opacity: 1,
-    },
-    {
-        classes: ['green'],
-        color: 'rgb(15,200,30)',
-        dia: 110,
-        opacity: test.options.opacity,
-    },
-]
-test.ptrMoveCallbk = searchLights.dbnce(() => console.log('movement'), 500)
-// searchLights.init(test)
-
-// const pointerEls = document.querySelectorAll('.searchLights')
-
-// const ptrsZindex = function (z) {
-//     console.log('pointer stopped')
-//     let zVal = getComputedStyle(document.documentElement).getPropertyValue(
-//         '--ptrs-z-index'
-//     ) // #999999
-//     console.log(zVal)
-
-//     if (zVal == 100) {
-//         zVal = -1
-//     } else {
-//         zVal = 100
-//     }
-//     console.log(zVal)
-//     document.documentElement.style.setProperty('--ptrs-z-index', zVal)
-// }
-
-// document.addEventListener('srchLtsPtrHalted', ptrsZindex, false)
-
-// document.addEventListener(
-//     'pointermove',
-//     searchLights.dbnce(() => ptrsZindex(), 400),
-//     false
-// )
-
-// searchLights.init(test)
