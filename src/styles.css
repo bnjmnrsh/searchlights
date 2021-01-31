@@ -22,7 +22,6 @@ html {
     max-width: 40em;
     overflow: hidden;
     border-radius: 5px;
-    background-blend-mode: soft-light;
 }
 .content h1 {
     /* padding: 0.5em; */
@@ -39,14 +38,6 @@ html {
     box-shadow: 0px 0px 0px 2px rgba(240, 255, 255, 0.5),
         inset 0px 0px 0px 20px rgba(240, 255, 255, 0.5);
 }
-.content span::before {
-    content: '';
-    /* position: absolute; */
-    /* top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0; */
-}
 
 #svg-mesh,
 #background {
@@ -57,14 +48,14 @@ html {
     width: 100%;
     height: 100vh;
     background: teal
-        url('https://images.unsplash.com/photo-1541028114007-e33143a0a955?auto=format&fit=crop&w=1900&q=30')
+        url('https://images.unsplash.com/photo-1541028114007-e33143a0a955?auto=format&fit=crop&w=500&q=10')
         no-repeat center center fixed;
     background-size: cover;
-    mix-blend-mode: soft-light;
+    mix-blend-mode: multiply;
 }
 
 #svgMesh circle {
-    fill: teal;
+    fill: red;
 }
 
 #svgMesh {
@@ -75,12 +66,13 @@ html {
     position: absolute;
     transition-timing-function: ease-out;
 }
+/*
 .mix-blend-mode .searchlight.red {
     transition-duration: 425ms;
 }
 .mix-blend-mode .searchlight.green {
     transition-duration: 585ms;
 }
-.mix-blend-mode .searchlight.blue {
+.mix-blend-mode .searchlight.blue[style] {
     transition-duration: 725ms;
-}
+} */
