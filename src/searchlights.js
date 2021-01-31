@@ -8,7 +8,7 @@
  *
  * @todo Consider ways to adjust layering order. Is z-index easiest?
  *
- * @todo Consider using a refrence to the actual ptr DOM element computed width and height rather try to calculate center settings.
+ * @done Consider using a refrence to the actual ptr DOM element computed width and height rather try to calculate center settings.
  * This will keep the pointer centered even if the values are changed with js later.
  *
  * @done refactor createSrchLtEls() to allow numeric 0 values from data-*
@@ -37,20 +37,22 @@ window.searchLights = (function (options) {
 
     // Default values
     srchLts.defaults = {
-        opacity: 0.8,
-        blend: 'exclusion',
-        blur: 1,
-        dia: 100,
-        attach: 'body',
         target: '.searchlight',
-        easing: 'ease',
-        timing: '100',
+        attach: 'body',
+        blur: 1,
+        elDia: 100,
+        elWidth: null,
+        elheight: null,
+        blend: 'exclusion',
+        opacity: 0.8,
+        easing: null,
+        timing: null,
     }
     srchLts.defaults.ptrEls = [
         {
             classes: ['red'],
             color: 'rgb(255,0,0)',
-            dia: srchLts.defaults.dia,
+            elDia: srchLts.defaults.elDia,
             blur: srchLts.defaults.blur,
             blend: srchLts.defaults.blend,
             opacity: srchLts.defaults.opacity,
@@ -58,7 +60,7 @@ window.searchLights = (function (options) {
         {
             classes: ['green'],
             color: 'rgb(0,255,0)',
-            dia: srchLts.defaults.dia,
+            elDia: srchLts.defaults.elDia,
             blur: srchLts.defaults.blur,
             blend: srchLts.defaults.blend,
             opacity: srchLts.defaults.opacity,
@@ -66,7 +68,7 @@ window.searchLights = (function (options) {
         {
             classes: ['blue'],
             color: 'rgb(0,0,255)',
-            dia: srchLts.defaults.dia,
+            elDia: srchLts.defaults.elDia,
             blur: srchLts.defaults.blur,
             blend: srchLts.defaults.blend,
             opacity: srchLts.defaults.opacity,
@@ -136,7 +138,7 @@ window.searchLights = (function (options) {
      */
     const setBlending = function (el, blend = srchLts.settings.blend) {
         // test incoming values
-        if (!isDOM(el) && typeof blend !== 'string') return
+        if (!isDOM(el) && typeof blend === 'string') return
         el.style.mixBlendMode = blend
     }
 
@@ -148,9 +150,9 @@ window.searchLights = (function (options) {
      */
     const setEasing = function (el, easing = srchLts.settings.easing) {
         // test incoming values
-        if (!isDOM(el) && typeof easing !== 'number') return
-        el.style.transitionTimingFunction = easing + 'ms'
-        // a new comment
+        if (!isDOM(el) && typeof easing === 'string') return
+        el.style.transitionTimingFunction = easing
+        // console.log(el.style.transitionTimingFunction)
     }
 
     /**
@@ -164,8 +166,8 @@ window.searchLights = (function (options) {
         transition = srchLts.settings.transition
     ) {
         // test incoming values
-        if (!isDOM(el) && typeof easing !== 'string') return
-        el.style.transitionDuration = transition
+        if (!isDOM(el) && typeof transition !== 'number') return
+        el.style.transitionDuration = transition + 'ms'
     }
 
     /**
@@ -233,9 +235,9 @@ window.searchLights = (function (options) {
                 .replace(/[.,#]/g, '')
             // Set defaults if not present
 
-            const dia = ptrEl.dia
-                ? parseInt(ptrEl.dia)
-                : parseInt(srchLts.settings.dia)
+            const dia = ptrEl.elDia
+                ? parseInt(ptrEl.elDia)
+                : parseInt(srchLts.settings.elDia)
             const blend = ptrEl.blend ? ptrEl.blend : srchLts.settings.blend
             const blur = ptrEl.blur
                 ? ptrEl.blur
@@ -246,7 +248,7 @@ window.searchLights = (function (options) {
 
             canvas.className = classesStr
             canvas.setAttribute('data-color', ptrEl.color)
-            canvas.setAttribute('data-dia', dia)
+            canvas.setAttribute('data-el-dia', dia)
             canvas.setAttribute('data-blend', blend)
             canvas.setAttribute('data-blur', blur)
             canvas.setAttribute('data-opacity', opacity)
@@ -272,12 +274,12 @@ window.searchLights = (function (options) {
         // Teset for canvas DOM element
         if (canvasEl.tagName !== 'CANVAS') return
 
-        const dia = parseInt(canvasEl.dataset.dia || srchLts.settings.dia)
+        const elDia = parseInt(canvasEl.dataset.elDia || srchLts.settings.elDia)
         const blur = parseInt(canvasEl.dataset.blur || srchLts.settings.blur)
 
         // Set height and width of canvas element
-        canvasEl.width = dia + blur * 2
-        canvasEl.height = dia + blur * 2
+        canvasEl.width = elDia + blur * 2
+        canvasEl.height = elDia + blur * 2
 
         const ctx = canvasEl.getContext('2d')
 
@@ -293,16 +295,16 @@ window.searchLights = (function (options) {
      */
     srchLts.drawCtx = function (ctx) {
         if (ctx.constructor.name !== 'CanvasRenderingContext2D') return
-        const dia = parseFloat(ctx.srchLt.dia)
+        const elDia = parseFloat(ctx.srchLt.elDia)
         const blur = parseFloat(ctx.srchLt.blur)
         ctx.fillStyle = ctx.srchLt.color
         ctx.filter = 'blur(' + parseInt(ctx.srchLt.blur) + 'px)'
         ctx.beginPath()
         ctx.closePath()
         ctx.arc(
-            dia / 2 + blur,
-            dia / 2 + blur,
-            dia / 2 - blur * 2,
+            elDia / 2 + blur,
+            elDia / 2 + blur,
+            elDia / 2 - blur * 2,
             0,
             Math.PI * 2
         )
@@ -391,8 +393,10 @@ window.searchLights = (function (options) {
     }
 
     srchLts.destroy = function () {
+        // Make sure we have already been initialised
         if (!srchLts.settings) return
 
+        // Remove event listeners
         document.removeEventListener('onpointermove', srchLtsFollow, false)
         document.removeEventListener(
             'onpointerenter',
@@ -404,11 +408,71 @@ window.searchLights = (function (options) {
             srchLts.hideSrchLts,
             false
         )
-        srchLts.settings = undefined
+
+        // Remove elements from DOM
         srchLts.ptrs.forEach(function (el) {
             el.remove()
         })
+
+        // Nuke run time objects: settings, ptrs
         srchLts.ptrs = undefined
+        srchLts.settings = undefined
+    }
+
+    /**
+     * Create the srchLts.settings object
+     * by combining any provided user options with srchLts.defaults.
+     *
+     * @param {*} opts
+     */
+    const buildSettingsObj = function (opts) {
+        // merge options with defaults
+        srchLts.settings = Object.assign({}, srchLts.defaults, srchLts.options)
+
+        // Allow overrideing of API methods
+        srchLts = Object.assign(srchLts, opts)
+
+        console.log(opts)
+
+        // If the user didn't provide options.ptrEls,
+        // we merge any top level options as new defaults
+        // in the template for making new pointers: srchLts.settings.ptrEls
+        if (opts && opts.options.ptrEls !== 'undefined') {
+            srchLts.settings.ptrEls.forEach((ptrEl, i) => {
+                ptrEl = Object.assign(ptrEl, opts.options.ptrEls[i])
+                console.log(ptrEl)
+            })
+        }
+    }
+
+    /**
+     * Add canvas el to DOM, draw the 2d Context, and apply inline styles.
+     */
+    const assembleSrchLtPtrs = function () {
+        // Attach the pointer elements to the DOM
+        srchLts.ptrs = srchLts.createSrchLtEls(
+            srchLts.settings.ptrEls,
+            srchLts.settings.target
+        )
+
+        // draw each element
+        srchLts.ptrs.forEach(function (el) {
+            if (!isDOM(el)) return
+
+            // create the 2d conext
+            const ctx = srchLts.create2dCtx(el, srchLts)
+            // console.log(ctx.srchLt)
+
+            // Set element styles
+            srchLts.centerOnPtr(el)
+            setBlending(el, ctx.srchLt.blend)
+            setOpacity(el, ctx.srchLt.opacity)
+            setEasing(el, ctx.srchLt.easing)
+            setTransition(el, ctx.srchLt.transition)
+
+            // draw the elements
+            srchLts.drawCtx(ctx)
+        })
     }
 
     /**
@@ -417,54 +481,27 @@ window.searchLights = (function (options) {
      * @param {*} options
      */
     srchLts.init = function (opts) {
+        // if (opts) console.log(opts)
         // destroy any preexsiting initialisation
         srchLts.destroy()
 
         // Bail if browser dosen't support blending modes (see notes on safari)
         if (!supportsBlend()) return
 
-        // merge options with defaults
-        srchLts = Object.assign(srchLts, opts)
-        srchLts.settings = Object.assign({}, srchLts.defaults, srchLts.options)
+        // Merge defaults and user options into new srchLts.settings object
+        buildSettingsObj(opts)
 
-        // If there is no options.ptrEls
-        if (opts && opt.options.ptrEls !== 'undefined') {
-            //Populate settings.ptrEls with top level options
-            srchLts.settings.ptrEls.forEach((ptrEl) => {
-                ptrEl = Object.assign(ptrEl, opts.options)
-                console.log(ptrEl)
-            })
-        }
-        // we need to assemble new ptrEls that merges defaults
-        srchLts.ptrs = srchLts.createSrchLtEls(
-            srchLts.settings.ptrEls,
-            srchLts.settings.target
-        )
+        // Draw each searchlight and add it to the DOM
+        assembleSrchLtPtrs()
 
-        // create all the elements
-        srchLts.ptrs.forEach(function (el) {
-            if (!isDOM(el)) return
-
-            // create the 2d conext
-            const ctx = srchLts.create2dCtx(el, srchLts)
-
-            // set the blending mode with inline styles
-            setBlending(el, ctx.srchLt.blend)
-
-            // center the pointer
-            srchLts.centerOnPtr(el)
-
-            // set the blending mode with inline styles
-            setOpacity(el, ctx.srchLt.opacity)
-
-            // draw the elements
-            srchLts.drawCtx(ctx)
-        })
-
+        // Set up event listeners
         srchLts.eventSetup()
 
+        // return updated srchLts object
         return srchLts
     }
+
+    // make the srcLts our public API
     return srchLts
 })()
 
@@ -474,37 +511,40 @@ searchLights.init()
 const test = {
     options: {
         opacity: 0.8,
-        blend: 'screen',
-        dia: 200,
+        blend: 'difference',
+        elDia: 400,
+        blur: 60,
     },
 }
 
-// test.options.ptrEls = [
-//     {
-//         classes: ['test', 'blue'],
-//         color: 'rgb(33, 27, 27)',
-//         dia: test.options.dia,
-//         blur: 0.1,
-//         opacity: test.options.opacity,
-//         blend: 'null',
-//     },
-//     {
-//         classes: ['red'],
-//         color: 'rgb(15,30,200)',
-//         dia: 300,
-//         blur: 4,
-//         blend: test.options.blend,
-//         opacity: 1,
-//     },
-//     {
-//         classes: ['green'],
-//         color: 'rgb(15,200,30)',
-//         dia: 110,
-//         opacity: test.options.opacity,
-//     },
-// ]
-// test.ptrMoveCallbk = searchLights.dbnce(() => console.log('movement'), 500)
-// searchLights.init(test)
+test.options.ptrEls = [
+    {
+        classes: ['test', 'blue'],
+        color: 'rgb(33, 27, 27)',
+        elDia: test.options.elDia,
+        blur: 0.1,
+        opacity: test.options.opacity,
+        blend: 'screen',
+        easing: 'ease-in',
+        timing: 20,
+    },
+    {
+        classes: ['red'],
+        color: 'rgb(15,30,200)',
+        elDia: 300,
+        blur: 4,
+        blend: test.options.blend,
+        opacity: 1,
+    },
+    {
+        classes: ['green'],
+        color: 'rgb(15,200,30)',
+        elDia: 110,
+        opacity: test.options.opacity,
+    },
+]
+test.ptrMoveCallbk = searchLights.dbnce(() => console.log('movement'), 500)
+searchLights.init(test)
 
 // const pointerEls = document.querySelectorAll('.searchLights')
 
