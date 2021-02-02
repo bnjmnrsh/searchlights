@@ -3,14 +3,12 @@
  *
  * todo list
  * @todo Bug with timing, being passed through as string, should be an int. (we turn it into a string anyway tho...)
- * @toto If we are inlining styes on the elemetn, we should create the basic stylesheet on the fly.
- * https://davidwalsh.name/add-rules-stylesheets
- * https://gomakethings.com/two-ways-to-set-an-elements-css-with-vanilla-javascript/
+ * @todo Believe that the ctx element is not getting all the default values. line 418
  *
- * @todo make sure the when adding elements to the DOM it is done in such a way as to minimise redraw
+ * @todo make sure the when adding elements to the DOM it is done in such a way as to minimise redraw/reflow
  *
- * @todo Better handeling of pointers first appearance on screen (now they sit at 00 untill poiner event.\
- * @todo Assess if rather then tracking if the mouse leaves body to show/hide, instead if it leaves the 'attach' target with custom event?
+ * @todo Better handeling of pointers first appearance on screen (now they sit at 00 untill poiner event.)
+ * @done Assess if rather then tracking if the mouse leaves body to show/hide, instead if it leaves the 'attach' target with custom event? / changes made to srchLts.eventSetup
  *
  * @todo Consider a constructor to be able to create more then one.
  *
@@ -19,6 +17,7 @@
  * @todo Automatically calculate off center seperation of searchlights provided a distance value
  * @todo Optionally be able to converge searchlights to 0 (cursor tip) after the cursor pauses
  *
+ * @done If we are inlining styes on the elemetn, we should create the basic stylesheet on the fly.
  * @done destroy method for cleanup . . .
  * @done Be able to specify in options what element the pointers should be prepended to // done with 'attach' option
  * @done Consider using a refrence to the actual ptr DOM element computed width and height rather try to calculate center settings.
@@ -28,9 +27,11 @@
  *
  * @wont Consider ways to adjust layering order. Is z-index easiest? // achivable with callback or event listener.
  * @wont Optionally be able to shuffle or randomise the css transition value for each searchlight after cursor pause to make it behavior less predictable // could be done with css and external js
+ * -->https://css-tricks.com/newsletter/236-initialisms-and-layout-shifts/ && https://imagineer.in/blog/stacking-context-with-opacity/
  * @wont ::before ::after psudo elemnts in order to transition blending mode on cursor stop? // could be achieved with css, so added flag to disable inline styles.
  *
  * @param {*} optons
+ *
  */
 
 window.searchLights = (function (options) {
@@ -48,14 +49,15 @@ window.searchLights = (function (options) {
     srchLts.defaults = {
         target: '.searchlight',
         attach: 'body',
-        blur: 5,
+        blur: 3,
         dia: 100,
-        width: null,
-        height: null,
         blend: 'screen',
         opacity: 0.8,
         easing: 'ease-out',
-        timing: 900,
+        timing: 90,
+        width: null,
+        height: null,
+        color: undefined,
     }
     srchLts.defaults.ptrEls = [
         {
@@ -131,6 +133,21 @@ window.searchLights = (function (options) {
     }
 
     /**
+     * Builds the base syles for searchLights
+     * and returns the node to be attached to the DOM
+     *
+     * @param {*} target
+     * @param {*} attach
+     *
+     * @returns DOM node
+     */
+    const setBaseStyles = function (attach) {
+        const baseStyles = document.createElement('style')
+        baseStyles.innerHTML = `.mix-blend-mode ${attach} { position: absolute; }`
+        return baseStyles
+    }
+
+    /**
      * Set an element's opacity mode
      *
      * @param {*} el
@@ -150,7 +167,6 @@ window.searchLights = (function (options) {
      */
     const setBlending = function (el, blend = srchLts.settings.blend) {
         // test incoming values
-        console.log()
         if (!isDOM(el) || typeof blend !== 'string') return
         el.style.mixBlendMode = blend
     }
@@ -229,6 +245,14 @@ window.searchLights = (function (options) {
             srchLts.settings.target
         )
 
+        // if useInlineStyles is true, add the base styles to head
+        if (srchLts.useInlineStyles) {
+            document.head.insertAdjacentElement(
+                'afterbegin',
+                setBaseStyles(srchLts.settings.target)
+            )
+        }
+
         // draw each element
         srchLts.ptrs.forEach(function (el) {
             if (!isDOM(el)) return
@@ -236,10 +260,10 @@ window.searchLights = (function (options) {
             // create the 2d conext
             const ctx = srchLts.create2dCtx(el, srchLts)
 
-            // Set element styles
+            // Set each element's specific styles
             srchLts.centerOnPtr(el)
 
-            // assign the styles unless overwridden
+            // if useInlineStyles is true assign the styles to each element
             if (srchLts.useInlineStyles) {
                 setBlending(el, ctx.srchLt.blend)
                 setOpacity(el, ctx.srchLt.opacity)
@@ -283,8 +307,8 @@ window.searchLights = (function (options) {
     srchLts.createSrchLtEls = function (ptrEls = [], target) {
         const ptrs = document.querySelectorAll(target)
 
-        // If elements are already in the DOM return them
-        if (ptrs.length) {
+        // If elements are already in the DOM return them set isDOM flag
+        if (ptrs && ptrs.length) {
             srchLts.isDOM = true
             return ptrs
         }
@@ -295,11 +319,12 @@ window.searchLights = (function (options) {
 
             // Make sure that at least the default target class is present
             ptrEl.classes.push(target)
+            // Remove empty array elememts
             ptrEl.classes = ptrEl.classes.filter(Boolean)
-
+            // Make it a string, removing any full stops
             const classesStr = [...new Set(ptrEl.classes)]
                 .join(' ')
-                .replace(/[.,#]/g, '')
+                .replace(/[.]/g, '')
 
             // Set defaults if not present
             const dia = ptrEl.dia
@@ -330,10 +355,11 @@ window.searchLights = (function (options) {
                 ? srchLts.settings.attach
                 : 'body'
             const attach = document.querySelector(prependTarget)
-            attach.prepend(canvas)
+            attach ? attach.prepend(canvas) : ''
         })
-        // NodeList of elements now in DOM
-        return document.querySelectorAll(target)
+        // Return the nodeList of searchlight elements now in the DOM
+        const allSrcLts = document.querySelectorAll(target)
+        return allSrcLts ? allSrcLts : -1
     }
 
     /**
@@ -361,6 +387,12 @@ window.searchLights = (function (options) {
 
         // Add all canvasEl data attrs to ctx object for future use
         ctx.srchLt = { ...canvasEl.dataset }
+
+        /**
+         *
+         * Here we need to merge in defaults if not present in ctx.srchLt
+         *
+         */
 
         return ctx
     }
@@ -397,7 +429,6 @@ window.searchLights = (function (options) {
      */
     srchLts.showSrchLts = function (e, nodeList) {
         if (!isNodeList(nodeList)) return
-        console.log('show')
         nodeList.forEach(function (el) {
             el.style.opacity = el.dataset.opacity || srchLts.settings.opacity
         })
@@ -444,26 +475,26 @@ window.searchLights = (function (options) {
 
     const ptrOverEls = function (els) {}
     /**
-     * Sets up pointer event listeners
+     * Sets up pointer event listeners onto the srchLts.settings.attach element
      *
      * @param {*} settings
      */
     srchLts.eventSetup = function () {
         const ptrs = srchLts.ptrs
+        const el = document.querySelector(srchLts.settings.attach)
 
         // register the event listener
-        document.onpointermove = (e) => {
+        el.onpointermove = (e) => {
             // Track the pointer
             srchLtsFollow(e, srchLts.ptrs)
             srchLts.ptrMoveCallbk()
-            document.dispatchEvent(srchLts.ptrHalted)
+            el.dispatchEvent(srchLts.ptrHalted)
         }
-        document.onpointerenter = (e) => {
+        el.onpointerenter = (e) => {
             srchLts.showSrchLts(e, srchLts.ptrs)
             srchLts.ptrEnterCallbk(e, srchLts)
         }
-        document.onpointerleave = (e) => {
-            console.log(srchLts)
+        el.onpointerleave = (e) => {
             srchLts.hideSrchLts(e, srchLts.ptrs)
             srchLts.ptrLeaveCallbk(e, srchLts)
         }
