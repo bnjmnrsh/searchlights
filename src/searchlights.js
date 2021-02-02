@@ -17,6 +17,7 @@
  * @todo Automatically calculate off center seperation of searchlights provided a distance value
  * @todo Optionally be able to converge searchlights to 0 (cursor tip) after the cursor pauses
  *
+ * @done Ensure that any provided options are dynamically turned into data-* attributes
  * @done If we are inlining styes on the elemetn, we should create the basic stylesheet on the fly.
  * @done destroy method for cleanup . . .
  * @done Be able to specify in options what element the pointers should be prepended to // done with 'attach' option
@@ -350,20 +351,24 @@ window.searchLights = (function (options) {
                 : parseInt(srchLts.settings.timing)
 
             canvas.className = classesStr
-            console.log(ptrEl)
 
-            canvas.setAttribute('data-color', ptrEl.color)
-            canvas.setAttribute('data-dia', dia)
-            canvas.setAttribute('data-blend', blend)
-            canvas.setAttribute('data-blur', blur)
-            canvas.setAttribute('data-timing', timing)
-            canvas.setAttribute('data-easing', easing)
-
+            // copy the current ptrEl into a new object
+            const copyPtrEl = { ...ptrEl }
+            // remove the classes array
+            delete copyPtrEl.classes
+            // turn the prtEl options into data attributes
+            for (const property in copyPtrEl) {
+                canvas.setAttribute(
+                    `data-${property}`,
+                    `${copyPtrEl[property]}`
+                )
+            }
+            // Attach it to the DOM
             srchLts.settings.attachedEl
                 ? srchLts.settings.attachedEl.prepend(canvas)
                 : ''
         })
-        // Return the nodeList of searchlight elements now in the DOM
+        // refresh the nodeList of searchlight elements now in the DOM
         allSrcLts = document.querySelectorAll(target)
         return allSrcLts ? allSrcLts : -1
     }
