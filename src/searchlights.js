@@ -213,6 +213,32 @@ window.searchLights = (function (options) {
     }
 
     /**
+     * Takes an array of class names, and merges it with any provided string
+     * It will strip empty values and remove any stray peroids(.) from user data
+     * It returns the assembled string of classes.
+     *
+     * @param {*} classArray
+     * @param {*} string
+     *
+     * @returns string of classes
+     */
+
+    const strinifyClassArray = function (classArray = [], string = '') {
+        // merge array with provided target class as string
+        classArray.push(string)
+
+        // Remove empty array elememts
+        classArray = classArray.filter(Boolean)
+
+        // Make it a string, removing any full stops
+        const classesStr = [...new Set(classArray)]
+            .join(' ')
+            .replace(/[.]/g, '')
+
+        return classesStr
+    }
+
+    /**
      * Create the srchLts.settings object
      * by combining any provided user options with srchLts.defaults.
      *
@@ -324,38 +350,30 @@ window.searchLights = (function (options) {
         // Otherwise create them
         ptrEls.forEach(function (ptrEl) {
             const canvas = document.createElement('canvas')
+            // Add classes
+            canvas.className = strinifyClassArray(ptrEl.classes, target)
 
-            // Make sure that at least the default target class is present
-            ptrEl.classes.push(target)
-            // Remove empty array elememts
-            ptrEl.classes = ptrEl.classes.filter(Boolean)
-            // Make it a string, removing any full stops
-            const classesStr = [...new Set(ptrEl.classes)]
-                .join(' ')
-                .replace(/[.]/g, '')
-
-            // Set defaults if not present
-            const dia = ptrEl.dia
+            // Sanitise and set defaults if not present
+            ptrEl.dia = ptrEl.dia
                 ? parseInt(ptrEl.dia)
                 : parseInt(srchLts.settings.dia)
-            const blend = ptrEl.blend ? ptrEl.blend : srchLts.settings.blend
-            const blur = ptrEl.blur
+            ptrEl.blend = ptrEl.blend ? ptrEl.blend : srchLts.settings.blend
+            ptrEl.blur = ptrEl.blur
                 ? ptrEl.blur
                 : parseFloat(srchLts.settings.blur)
-            const opacity = isNaN(parseFloat(ptrEl.opacity))
+            ptrEl.opacity = isNaN(parseFloat(ptrEl.opacity))
                 ? parseFloat(ptrEl.opacity)
                 : parseFloat(srchLts.settings.opacity)
-            const easing = ptrEl.easing ? ptrEl.easing : srchLts.settings.easing
-            const timing = ptrEl.timing
+            ptrEl.easing = ptrEl.easing ? ptrEl.easing : srchLts.settings.easing
+            ptrEl.timing = ptrEl.timing
                 ? parseInt(ptrEl.timing)
                 : parseInt(srchLts.settings.timing)
-
-            canvas.className = classesStr
 
             // copy the current ptrEl into a new object
             const copyPtrEl = { ...ptrEl }
             // remove the classes array
             delete copyPtrEl.classes
+
             // turn the prtEl options into data attributes
             for (const property in copyPtrEl) {
                 canvas.setAttribute(
