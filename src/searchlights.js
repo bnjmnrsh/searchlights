@@ -48,7 +48,7 @@ window.searchLights = (function (options) {
     // Default values
     srchLts.defaults = {
         target: '.searchlight',
-        attach: 'body',
+        attachTarget: 'body',
         blur: 3,
         dia: 100,
         blend: 'screen',
@@ -136,14 +136,13 @@ window.searchLights = (function (options) {
      * Builds the base syles for searchLights
      * and returns the node to be attached to the DOM
      *
-     * @param {*} target
-     * @param {*} attach
+     * @param {*} target | searchLight elements class
      *
-     * @returns DOM node
+     * @returns DOM style node with content
      */
-    const setBaseStyles = function (attach) {
+    const setBaseStyles = function (target = srchLts.settings.target) {
         const baseStyles = document.createElement('style')
-        baseStyles.innerHTML = `.mix-blend-mode ${attach} { position: absolute; }`
+        baseStyles.innerHTML = `.mix-blend-mode ${target} { position: absolute; }`
         return baseStyles
     }
 
@@ -233,6 +232,14 @@ window.searchLights = (function (options) {
                 ptrEl = Object.assign(ptrEl, opts.options.ptrEls[i])
             })
         }
+
+        // Capture our elements
+        srchLts.settings.attachedEl = document.querySelector(
+            srchLts.settings.attachTarget
+        )
+        !srchLts.settings.attachedEl
+            ? (srchLts.settings.attachedEl = document.body)
+            : ''
     }
 
     /**
@@ -305,17 +312,17 @@ window.searchLights = (function (options) {
      * @returns [*] NodeList of canvas elements in DOM
      */
     srchLts.createSrchLtEls = function (ptrEls = [], target) {
-        const ptrs = document.querySelectorAll(target)
+        let allSrcLts = document.querySelectorAll(target)
 
         // If elements are already in the DOM return them set isDOM flag
-        if (ptrs && ptrs.length) {
+        if (allSrcLts && allSrcLts.length) {
             srchLts.isDOM = true
-            return ptrs
+            return allSrcLts
         }
 
         // Otherwise create them
         ptrEls.forEach(function (ptrEl) {
-            let canvas = document.createElement('canvas')
+            const canvas = document.createElement('canvas')
 
             // Make sure that at least the default target class is present
             ptrEl.classes.push(target)
@@ -343,6 +350,8 @@ window.searchLights = (function (options) {
                 : parseInt(srchLts.settings.timing)
 
             canvas.className = classesStr
+            console.log(ptrEl)
+
             canvas.setAttribute('data-color', ptrEl.color)
             canvas.setAttribute('data-dia', dia)
             canvas.setAttribute('data-blend', blend)
@@ -350,15 +359,12 @@ window.searchLights = (function (options) {
             canvas.setAttribute('data-timing', timing)
             canvas.setAttribute('data-easing', easing)
 
-            // if a 'attach' target has been set use it, otherwise body
-            const prependTarget = srchLts.settings.attach
-                ? srchLts.settings.attach
-                : 'body'
-            const attach = document.querySelector(prependTarget)
-            attach ? attach.prepend(canvas) : ''
+            srchLts.settings.attachedEl
+                ? srchLts.settings.attachedEl.prepend(canvas)
+                : ''
         })
         // Return the nodeList of searchlight elements now in the DOM
-        const allSrcLts = document.querySelectorAll(target)
+        allSrcLts = document.querySelectorAll(target)
         return allSrcLts ? allSrcLts : -1
     }
 
@@ -481,7 +487,7 @@ window.searchLights = (function (options) {
      */
     srchLts.eventSetup = function () {
         const ptrs = srchLts.ptrs
-        const el = document.querySelector(srchLts.settings.attach)
+        const el = srchLts.settings.attachedEl
 
         // register the event listener
         el.onpointermove = (e) => {
