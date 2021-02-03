@@ -2,6 +2,9 @@
  * Searchlights.js
  *
  * todo list
+ * @todo Firefox the motion is VERY jerky, just like it is on a tablet.
+ * @todo On safari, the borders are not blured.
+ *
  * @todo Bug with timing, being passed through as string, should be an int. (we turn it into a string anyway tho...)
  * @todo Believe that the ctx element is not getting all the default values. line 418
  *
@@ -46,10 +49,13 @@ window.searchLights = (function (options) {
      */
     srchLts.useInlineStyles = true
 
+    srchLts.targetClass = '.searchlight'
+    srchLts.parentEl = 'body'
+    srchLts.parentZ = -1
+    srchLts.enableShowHide = true
+
     // Default values
     srchLts.defaults = {
-        target: '.searchlight',
-        attachTarget: 'body',
         blur: 3,
         dia: 100,
         blend: 'screen',
@@ -137,13 +143,13 @@ window.searchLights = (function (options) {
      * Builds the base syles for searchLights
      * and returns the node to be attached to the DOM
      *
-     * @param {*} target | searchLight elements class
+     * @param {*} targetClass | searchLight elements class
      *
      * @returns DOM style node with content
      */
-    const setBaseStyles = function (target = srchLts.settings.target) {
+    const setBaseStyles = function (targetClass = srchLts.targetClass) {
         const baseStyles = document.createElement('style')
-        baseStyles.innerHTML = `.mix-blend-mode ${target} { position: absolute; }`
+        baseStyles.innerHTML = `.mix-blend-mode ${targetClass} { position: absolute; }`
         return baseStyles
     }
 
@@ -245,25 +251,28 @@ window.searchLights = (function (options) {
      * @param {*} opts
      */
     const buildSettingsObj = function (opts) {
-        // Allow overrideing of API methods
+        //  overrideing any API method
         srchLts = Object.assign(srchLts, opts)
 
         // merge options with defaults
         srchLts.settings = Object.assign({}, srchLts.defaults, srchLts.options)
+        console.log(srchLts.settings.ptrEls)
 
-        // If the user didn't provide options.ptrEls,
+        // If the user didn't provide options.ptrEls, or partial options
         // we merge any top level options as new defaults
-        // in the template for making new pointers: srchLts.settings.ptrEls
         if (opts && opts.options.ptrEls !== undefined) {
             srchLts.settings.ptrEls.forEach((ptrEl, i) => {
                 ptrEl = Object.assign(ptrEl, opts.options.ptrEls[i])
+                ptrEl = Object.assign({}, srchLts.defaults, ptrEl)
+                delete ptrEl.ptrEls
+                srchLts.settings.ptrEls[i] = ptrEl
             })
         }
 
+        console.log(srchLts.settings.ptrEls)
+
         // Capture our elements
-        srchLts.settings.attachedEl = document.querySelector(
-            srchLts.settings.attachTarget
-        )
+        srchLts.settings.attachedEl = document.querySelector(srchLts.parentEl)
         !srchLts.settings.attachedEl
             ? (srchLts.settings.attachedEl = document.body)
             : ''
@@ -276,14 +285,14 @@ window.searchLights = (function (options) {
         // Attach the pointer elements to the DOM
         srchLts.ptrs = srchLts.createSrchLtEls(
             srchLts.settings.ptrEls,
-            srchLts.settings.target
+            srchLts.targetClass
         )
 
         // if useInlineStyles is true, add the base styles to head
         if (srchLts.useInlineStyles) {
             document.head.insertAdjacentElement(
                 'afterbegin',
-                setBaseStyles(srchLts.settings.target)
+                setBaseStyles(srchLts.targetClass)
             )
         }
 
@@ -338,8 +347,8 @@ window.searchLights = (function (options) {
      * @param {*} ptrEls
      * @returns [*] NodeList of canvas elements in DOM
      */
-    srchLts.createSrchLtEls = function (ptrEls = [], target) {
-        let allSrcLts = document.querySelectorAll(target)
+    srchLts.createSrchLtEls = function (ptrEls = [], targetClass) {
+        let allSrcLts = document.querySelectorAll(targetClass)
 
         // If elements are already in the DOM return them set isDOM flag
         if (allSrcLts && allSrcLts.length) {
@@ -351,35 +360,42 @@ window.searchLights = (function (options) {
         ptrEls.forEach(function (ptrEl) {
             const canvas = document.createElement('canvas')
             // Add classes
-            canvas.className = strinifyClassArray(ptrEl.classes, target)
+            canvas.className = strinifyClassArray(ptrEl.classes, targetClass)
 
+            // console.log(ptrEl)
             // Sanitise and set defaults if not present
-            ptrEl.dia = ptrEl.dia
-                ? parseInt(ptrEl.dia)
-                : parseInt(srchLts.settings.dia)
-            ptrEl.blend = ptrEl.blend ? ptrEl.blend : srchLts.settings.blend
-            ptrEl.blur = ptrEl.blur
-                ? ptrEl.blur
-                : parseFloat(srchLts.settings.blur)
-            ptrEl.opacity = isNaN(parseFloat(ptrEl.opacity))
-                ? parseFloat(ptrEl.opacity)
-                : parseFloat(srchLts.settings.opacity)
-            ptrEl.easing = ptrEl.easing ? ptrEl.easing : srchLts.settings.easing
-            ptrEl.timing = ptrEl.timing
-                ? parseInt(ptrEl.timing)
-                : parseInt(srchLts.settings.timing)
+            // ptrEl.dia = ptrEl.dia
+            //     ? parseInt(ptrEl.dia)
+            //     : parseInt(srchLts.settings.dia)
+
+            // ptrEl.blend = ptrEl.blend ? ptrEl.blend : srchLts.settings.blend
+
+            // ptrEl.blur = ptrEl.blur
+            //     ? ptrEl.blur
+            //     : parseFloat(srchLts.settings.blur)
+            // ptrEl.opacity = isNaN(parseFloat(ptrEl.opacity))
+            //     ? parseFloat(ptrEl.opacity)
+            //     : parseFloat(srchLts.settings.opacity)
+            // ptrEl.easing = ptrEl.easing ? ptrEl.easing : srchLts.settings.easing
+            // ptrEl.timing = ptrEl.timing
+            //     ? parseInt(ptrEl.timing)
+            //     : parseInt(srchLts.settings.timing)
+
+            // console.log(ptrEl)
 
             // copy the current ptrEl into a new object
             const copyPtrEl = { ...ptrEl }
             // remove the classes array
             delete copyPtrEl.classes
 
-            // turn the prtEl options into data attributes
+            // turn any prtEl options into data attributes
             for (const property in copyPtrEl) {
-                canvas.setAttribute(
-                    `data-${property}`,
-                    `${copyPtrEl[property]}`
-                )
+                if (copyPtrEl[property]) {
+                    canvas.setAttribute(
+                        `data-${property}`,
+                        `${copyPtrEl[property]}`
+                    )
+                }
             }
             // Attach it to the DOM
             srchLts.settings.attachedEl
@@ -387,7 +403,7 @@ window.searchLights = (function (options) {
                 : ''
         })
         // refresh the nodeList of searchlight elements now in the DOM
-        allSrcLts = document.querySelectorAll(target)
+        allSrcLts = document.querySelectorAll(targetClass)
         return allSrcLts ? allSrcLts : -1
     }
 
@@ -471,7 +487,9 @@ window.searchLights = (function (options) {
     srchLts.hideSrchLts = function (e, nodeList) {
         if (!isNodeList(nodeList)) return
         nodeList.forEach(function (el) {
-            el.style.opacity = '0'
+            if (srchLts.enableShowHide) {
+                el.style.opacity = '0'
+            }
         })
     }
 
