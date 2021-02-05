@@ -1,19 +1,38 @@
 /**
- * Searchlights.js
+ * searchlights.js
  *
  * todo list
- * @todo Firefox the motion is VERY jerky, just like it is on a tablet.
- * @todo On safari, the borders are not blured.
+ * @todo consistantly sanitise or parse every output param before it hits the DOM. . .
+ * @todo hungarian notation (in progress) - http://cws.cengage.co.uk/rautenbach/students/ancillary_content/hungarian_notation.pdf
+ * @todo Consider a constructor to be able to create more then one.
+ *
+ * @todo onpointermove, vs onmousemove - onpointermove is janky on FF, but using onmousemove means that pointers aren't registered. Detect is user is using pointer?
+ * https://github.com/rafgraph/event-from, https://github.com/rafgraph/detect-it
+ *
+ * @todo On safari, the drawn borders are not blured - fake it with drop shadow?
+ *
+ * @todo convert nodeList.forEach() to Array.prototype.slice.call() for better backward compatibilty, if we were to use this with (for example) just css or perhaps SVG approaches.
  *
  * @todo Bug with timing, being passed through as string, should be an int. (we turn it into a string anyway tho...)
  * @todo Believe that the ctx element is not getting all the default values. line 418
  *
- * @todo make sure the when adding elements to the DOM it is done in such a way as to minimise redraw/reflow
+ * @todo Detect when the pointer is over an array of dom elemetns and optionally hide the element.
+ *
+ * @todo look at dynamically calling methods based on the data-* attr name. https://www.sitepoint.com/call-javascript-function-string-without-using-eval/
+ *       This would be usefull for regenerating new dom elemtnts based on exsisting data-* values. ie
+ *       given data-opacity='.5' check if a method exsists and if so run srchlte.opacity(el, .5)
+ *
+ * @todo add z-index to list of params (in progress)
+ * @todo add flag for the type of elemet to be made. Global? only or on a per elemtne basis? hummmmm
+ * @todo consider being able to disable inline classes on a per elemtnt basis.
+ *
+ * @todo make sure that when adding elements to the DOM it is done in such a way as to minimise redraw/reflow
  *
  * @todo Better handeling of pointers first appearance on screen (now they sit at 00 untill poiner event.)
- * @done Assess if rather then tracking if the mouse leaves body to show/hide, instead if it leaves the 'attach' target with custom event? / changes made to srchLts.eventSetup
  *
- * @todo Consider a constructor to be able to create more then one.
+ * @done Consider removing escape hatch if DOM elements already exsist. This could prevent us from createing algorithmic configs in future.
+ * @done Assess if rather then tracking if the mouse leaves body to show/hide, instead if it leaves the 'attach' target with custom event? / changes made to srchLts.m.fnEventSetup
+ *
  *
  * These might be best as an experiment in extending the plugin:
  * @todo Automatically calculate degrees of seperation for n searchlights
@@ -26,8 +45,8 @@
  * @done Be able to specify in options what element the pointers should be prepended to // done with 'attach' option
  * @done Consider using a refrence to the actual ptr DOM element computed width and height rather try to calculate center settings.
  * This will keep the pointer centered even if the values are changed with js later.
- * @done refactor createSrchLtEls() to allow numeric 0 values from data-*
- * @done refactor the merging of defaults and options into the settings object.
+ * @done refactor m.fnCreateSrchLtEls() to allow numeric 0 values from data-*
+ * @done refactor the merging of Defaults and options into the settings object.
  *
  * @wont Consider ways to adjust layering order. Is z-index easiest? // achivable with callback or event listener.
  * @wont Optionally be able to shuffle or randomise the css transition value for each searchlight after cursor pause to make it behavior less predictable // could be done with css and external js
@@ -41,57 +60,56 @@
 window.searchLights = (function (options) {
     ;('use strict')
 
-    // The public srchLts object
-    let srchLts = {}
+    // The public searchLights object
+    let slts = {}
 
     /**
      * Overwritable flag wich if false, will prevent most inline styles on canvas elements
      */
-    srchLts.useInlineStyles = true
+    slts.sParentEl = 'body'
+    slts.sTargetClass = '.searchlight'
+    slts.bUseInlineStyles = true
+    slts.bEnableShowHide = true
 
-    srchLts.targetClass = '.searchlight'
-    srchLts.parentEl = 'body'
-    srchLts.parentZ = -1
-    srchLts.enableShowHide = true
-
-    // Default values
-    srchLts.defaults = {
+    // Default element values
+    const Defaults = {
         blur: 3,
         dia: 100,
         blend: 'screen',
         opacity: 0.8,
         easing: 'ease-out',
         timing: 90,
-        width: null,
-        height: null,
+        width: undefined,
+        height: undefined,
         color: undefined,
+        zIndex: 0,
     }
-    srchLts.defaults.ptrEls = [
+    Defaults.ptrEls = [
         {
             classes: ['red'],
             color: 'rgb(255,0,0)',
-            dia: srchLts.defaults.dia,
-            blur: srchLts.defaults.blur,
-            blend: srchLts.defaults.blend,
-            opacity: srchLts.defaults.opacity,
+            dia: Defaults.dia,
+            blur: Defaults.blur,
+            blend: Defaults.blend,
+            opacity: Defaults.opacity,
             timing: 400,
         },
         {
             classes: ['green'],
             color: 'rgb(0,255,0)',
-            dia: srchLts.defaults.dia,
-            blur: srchLts.defaults.blur,
-            blend: srchLts.defaults.blend,
-            opacity: srchLts.defaults.opacity,
+            dia: Defaults.dia,
+            blur: Defaults.blur,
+            blend: Defaults.blend,
+            opacity: Defaults.opacity,
             timing: 425,
         },
         {
             classes: ['blue'],
             color: 'rgb(0,0,255)',
-            dia: srchLts.defaults.dia,
-            blur: srchLts.defaults.blur,
-            blend: srchLts.defaults.blend,
-            opacity: srchLts.defaults.opacity,
+            dia: Defaults.dia,
+            blur: Defaults.blur,
+            blend: Defaults.blend,
+            opacity: Defaults.opacity,
             timing: 475,
         },
     ]
@@ -104,7 +122,7 @@ window.searchLights = (function (options) {
      * @param {*} el
      * @returns boolean
      */
-    const isDOM = (el) => el instanceof Element
+    const _fnIsDOM = (el) => el instanceof Element
 
     /**
      * Test for if provided value is a NodeList, by testing for existence of item() method.
@@ -112,7 +130,7 @@ window.searchLights = (function (options) {
      * @param {*} nodeList
      * @returns boolean
      */
-    const isNodeList = (nodeList) => {
+    const _fnIsNodeList = (nodeList) => {
         if (!nodeList) return
         return typeof nodeList.item !== 'undefined'
     }
@@ -121,7 +139,7 @@ window.searchLights = (function (options) {
      * Checks if the browser reports supporting mixBlendingMode
      * Adds the class "mixBlendMode" to body if the browser supports it.
      *
-     * A JS based test is nessicary here as IE11 and doesn't support *-blend-modes, and nor does it
+     * A JS based test is nessicary here as IE11 and doesn't support mix-blend-mode, nor does it
      * support @supports.
      *
      * Note Safari has partial support, and will return true, despite not supporting the following:
@@ -131,26 +149,26 @@ window.searchLights = (function (options) {
      *
      * @returns boolean
      */
-    const supportsBlend = () => {
-        const supported =
+    const _fnSupportsBlend = () => {
+        const _bSupported =
             typeof window.getComputedStyle(document.body).mixBlendMode !==
             'undefined'
-        supported ? document.body.classList.add('mix-blend-mode') : ''
-        return supported
+        _bSupported ? document.body.classList.add('mix-blend-mode') : ''
+        return _bSupported
     }
 
     /**
      * Builds the base syles for searchLights
      * and returns the node to be attached to the DOM
      *
-     * @param {*} targetClass | searchLight elements class
+     * @param {*} className | searchLight elements class
      *
      * @returns DOM style node with content
      */
-    const setBaseStyles = function (targetClass = srchLts.targetClass) {
-        const baseStyles = document.createElement('style')
-        baseStyles.innerHTML = `.mix-blend-mode ${targetClass} { position: absolute; }`
-        return baseStyles
+    const _fnSetBaseStyles = function (className = slts.sTargetClass) {
+        const _nBaseStyleEl = document.createElement('style')
+        _nBaseStyleEl.innerHTML = `.mix-blend-mode ${className} { position: absolute; will-change: transform; }`
+        return _nBaseStyleEl
     }
 
     /**
@@ -159,9 +177,9 @@ window.searchLights = (function (options) {
      * @param {*} el
      * @param {*} opacity
      */
-    const setOpacity = function (el, opacity = srchLts.settings.opacity) {
+    const _fnSetOpacity = function (el, opacity = slts.settings.opacity) {
         // test incoming values
-        if (!isDOM(el) || typeof opacity !== 'number') return
+        if (!_fnIsDOM(el) || typeof opacity !== 'number') return
         el.style.opacity = opacity
     }
 
@@ -171,9 +189,9 @@ window.searchLights = (function (options) {
      * @param {*} el
      * @param {*} blend
      */
-    const setBlending = function (el, blend = srchLts.settings.blend) {
+    const _fnSetBlending = function (el, blend = slts.settings.blend) {
         // test incoming values
-        if (!isDOM(el) || typeof blend !== 'string') return
+        if (!_fnIsDOM(el) || typeof blend !== 'string') return
         el.style.mixBlendMode = blend
     }
 
@@ -183,9 +201,9 @@ window.searchLights = (function (options) {
      * @param {*} el
      * @param {*} easing
      */
-    const setEasing = function (el, easing = srchLts.settings.easing) {
+    const _fnSetEasing = function (el, easing = slts.settings.easing) {
         // test incoming values
-        if (!isDOM(el) || typeof easing !== 'string') return
+        if (!_fnIsDOM(el) || typeof easing !== 'string') return
         el.style.transitionTimingFunction = easing
     }
 
@@ -197,24 +215,131 @@ window.searchLights = (function (options) {
      * @param {*} el
      * @param {*} transition
      */
-    const setTiming = function (el, timing = srchLts.settings.transition) {
+    const _fnSetTiming = function (el, timing = slts.settings.transition) {
         // test incoming values
-        // if (!isDOM(el) || typeof opacity !== 'number') return
+        // if (!_fnIsDOM(el) || typeof opacity !== 'number') return
         el.style.transitionDuration = timing + 'ms'
     }
 
     /**
+     * Set an element's z-index
+     *
+     *
+     * @param {*} el
+     * @param {*} transition
+     */
+    const _fnSetZindex = function (el, zIndex = slts.settings.zIndex) {
+        // test incoming values
+        if (!_fnIsDOM(el) || typeof zIndex !== 'number') return
+        el.style.zIndex = zIndex
+    }
+
+    /**
+     * Create the slts.settings object
+     * by combining any provided user options with the Defaults object.
+     *
+     * @param {*} oOpts
+     */
+    const _fnBuildSettingsObj = function (oOpts) {
+        // Allow user to overrideing many API method with custom version, and merge in options object.
+        slts = Object.assign(slts, oOpts)
+
+        // see if there are any searchLight elements in the DOM, if so remove the default ones
+        const _nlDOMsrcLts = document.querySelectorAll(slts.sTargetClass)
+
+        let _aDefPtrEls = Defaults.ptrEls.slice()
+
+        if (_nlDOMsrcLts && _nlDOMsrcLts.length) {
+            // set a global flag to signify pre-exsitsing DOM elements found
+            slts._bIsDOM = true
+
+            // Remove them from defaults
+            Defaults.ptrEls = undefined
+        }
+
+        // create a new settings obj by merge the incoming options with Defaults
+        slts.settings = Object.assign({}, Defaults, slts.options)
+
+        // If the user didn't provide options.ptrEls, or only partial options
+        // then we merge any missing top level options into each el as default values.
+        if (oOpts && oOpts.options.ptrEls !== undefined) {
+            slts.settings.ptrEls.forEach((ptrEl, i) => {
+                ptrEl = Object.assign(ptrEl, oOpts.options.ptrEls[i])
+                ptrEl = Object.assign({}, Defaults, ptrEl)
+                // prevent Inception moment
+                delete ptrEl.ptrEls
+                slts.settings.ptrEls[i] = ptrEl
+            })
+        }
+
+        // return the default searchlight elements to the Defaults obj
+        if (_aDefPtrEls) {
+            Defaults.ptrEls = [..._aDefPtrEls]
+            console.log(Defaults)
+        }
+
+        // Now that we have set up Defaults, grab the parent to attach to
+        slts.srchLtsParentNode = document.querySelector(slts.sParentEl)
+    }
+
+    /**
+     * Add canvas el to DOM, draw the 2d Context, and apply inline styles.
+     */
+    const _fnAssembleSrchLtPtrs = function () {
+        // Attach the pointer elements to the DOM
+        slts.srchLtsElsNodeList = slts.m.fnCreateSrchLtEls(
+            slts.settings.ptrEls,
+            slts.sTargetClass
+        )
+
+        // if bUseInlineStyles is true, add the base styles to head
+        if (slts.bUseInlineStyles) {
+            document.head.insertAdjacentElement(
+                'afterbegin',
+                _fnSetBaseStyles(slts.sTargetClass)
+            )
+        }
+
+        // draw each element
+        slts.srchLtsElsNodeList.forEach(function (_el) {
+            if (!_fnIsDOM(_el)) return
+
+            // create the 2d conext
+            const _oCtx = slts.m._fnCreateCtx(_el, slts)
+
+            // Set each _element's specific styles
+            slts.m.fnCenterOnPtr(_el)
+
+            // if bUseInlineStyles is true assign the styles to each element
+            if (slts.bUseInlineStyles) {
+                _fnSetBlending(_el, _oCtx.srchLt.blend)
+                _fnSetOpacity(_el, _oCtx.srchLt.opacity)
+                _fnSetEasing(_el, _oCtx.srchLt.easing)
+                _fnSetTiming(_el, _oCtx.srchLt.timing)
+            }
+
+            // draw the elements
+            slts.m.fnDrawCtx(_oCtx)
+        })
+    }
+
+    // searchLights Public API methods
+
+    slts.m = {}
+
+    /**
      * Follow the pointer
      *
-     * @param {*} e
-     * @param {*} nodeList
+     * @param {*} _e
+     * @param {*} _nNodeList
      */
-    const srchLtsFollow = function (e, nodeList) {
-        if (!isNodeList(nodeList)) return
+    slts.m.fnFollowPtr = function (_e, _nNodeList) {
+        if (!_fnIsNodeList(_nNodeList)) return
 
-        nodeList.forEach(function (el) {
-            el.style.left = e.pageX + 'px'
-            el.style.top = e.pageY + 'px'
+        _nNodeList.forEach(function (_el) {
+            _el.style.left = _e.pageX + 'px'
+            _el.style.top = _e.pageY + 'px'
+            slts.m.fnSrchLtElsShow(_el, _nNodeList)
         })
     }
 
@@ -223,103 +348,24 @@ window.searchLights = (function (options) {
      * It will strip empty values and remove any stray peroids(.) from user data
      * It returns the assembled string of classes.
      *
-     * @param {*} classArray
-     * @param {*} string
+     * @param {*} _aClasses
+     * @param {*} _string
      *
      * @returns string of classes
      */
 
-    const strinifyClassArray = function (classArray = [], string = '') {
+    slts.m.fnStringifyClassArray = function (_aClasses = [], _string = '') {
         // merge array with provided target class as string
-        classArray.push(string)
+        _aClasses.push(_string)
 
         // Remove empty array elememts
-        classArray = classArray.filter(Boolean)
+        aClasses = _aClasses.filter(Boolean)
 
         // Make it a string, removing any full stops
-        const classesStr = [...new Set(classArray)]
-            .join(' ')
-            .replace(/[.]/g, '')
+        const _sClasses = [...new Set(_aClasses)].join(' ').replace(/[.]/g, '')
 
-        return classesStr
+        return _sClasses
     }
-
-    /**
-     * Create the srchLts.settings object
-     * by combining any provided user options with srchLts.defaults.
-     *
-     * @param {*} opts
-     */
-    const buildSettingsObj = function (opts) {
-        //  overrideing any API method
-        srchLts = Object.assign(srchLts, opts)
-
-        // merge options with defaults
-        srchLts.settings = Object.assign({}, srchLts.defaults, srchLts.options)
-        console.log(srchLts.settings.ptrEls)
-
-        // If the user didn't provide options.ptrEls, or partial options
-        // we merge any top level options as new defaults
-        if (opts && opts.options.ptrEls !== undefined) {
-            srchLts.settings.ptrEls.forEach((ptrEl, i) => {
-                ptrEl = Object.assign(ptrEl, opts.options.ptrEls[i])
-                ptrEl = Object.assign({}, srchLts.defaults, ptrEl)
-                delete ptrEl.ptrEls
-                srchLts.settings.ptrEls[i] = ptrEl
-            })
-        }
-
-        console.log(srchLts.settings.ptrEls)
-
-        // Capture our elements
-        srchLts.settings.attachedEl = document.querySelector(srchLts.parentEl)
-        !srchLts.settings.attachedEl
-            ? (srchLts.settings.attachedEl = document.body)
-            : ''
-    }
-
-    /**
-     * Add canvas el to DOM, draw the 2d Context, and apply inline styles.
-     */
-    const assembleSrchLtPtrs = function () {
-        // Attach the pointer elements to the DOM
-        srchLts.ptrs = srchLts.createSrchLtEls(
-            srchLts.settings.ptrEls,
-            srchLts.targetClass
-        )
-
-        // if useInlineStyles is true, add the base styles to head
-        if (srchLts.useInlineStyles) {
-            document.head.insertAdjacentElement(
-                'afterbegin',
-                setBaseStyles(srchLts.targetClass)
-            )
-        }
-
-        // draw each element
-        srchLts.ptrs.forEach(function (el) {
-            if (!isDOM(el)) return
-
-            // create the 2d conext
-            const ctx = srchLts.create2dCtx(el, srchLts)
-
-            // Set each element's specific styles
-            srchLts.centerOnPtr(el)
-
-            // if useInlineStyles is true assign the styles to each element
-            if (srchLts.useInlineStyles) {
-                setBlending(el, ctx.srchLt.blend)
-                setOpacity(el, ctx.srchLt.opacity)
-                setEasing(el, ctx.srchLt.easing)
-                setTiming(el, ctx.srchLt.timing)
-            }
-
-            // draw the elements
-            srchLts.drawCtx(ctx)
-        })
-    }
-
-    // srchLts Public API methods
 
     /**
      * A terse debouce function
@@ -327,11 +373,11 @@ window.searchLights = (function (options) {
      * @param {*} fn
      * @param {*} delay
      */
-    srchLts.dbnce = (fn, delay = 300) => {
-        let timer
+    slts.m.fnDbnce = (fn, delay = 300) => {
+        let _timer
         return (...args) => {
-            clearTimeout(timer)
-            timer = setTimeout(() => {
+            clearTimeout(_timer)
+            _timer = setTimeout(() => {
                 fn(...args)
             }, delay)
         }
@@ -339,52 +385,40 @@ window.searchLights = (function (options) {
 
     /**
      * Create canvas elements using either options.schLightEls array,
-     * or defaults.schLightEls if none exsits in DOM.
+     * or Defaults.schLightEls if none exsits in DOM.
      * Returns the resulting DOM NodeList of canvas elements.
      *
      * @todo make the target for prepending configerable
      *
-     * @param {*} ptrEls
+     * @param {*} aPtrEls
      * @returns [*] NodeList of canvas elements in DOM
      */
-    srchLts.createSrchLtEls = function (ptrEls = [], targetClass) {
-        let allSrcLts = document.querySelectorAll(targetClass)
+    slts.m.fnCreateSrchLtEls = function (aPtrEls = [], sTargetClass) {
+        // let allSrcLts = document.querySelectorAll(sTargetClass)
 
-        // If elements are already in the DOM return them set isDOM flag
-        if (allSrcLts && allSrcLts.length) {
-            srchLts.isDOM = true
-            return allSrcLts
-        }
+        // // If elements are already in the DOM return them set _fnIsDOM flag
+        // // And store the default pointer in a temp varriable
+        // if (allSrcLts && allSrcLts.length) {
+        //     slts._fnIsDOM = true
+        //     const _aDefPtrEls = [...Defaults.ptrEls]
+        //     // Remove it from defaults
+        //     delete Defaults.ptrEls
+        // }
+
+        console.log(aPtrEls)
 
         // Otherwise create them
-        ptrEls.forEach(function (ptrEl) {
+        aPtrEls.forEach(function (ptrEl) {
             const canvas = document.createElement('canvas')
             // Add classes
-            canvas.className = strinifyClassArray(ptrEl.classes, targetClass)
-
-            // console.log(ptrEl)
-            // Sanitise and set defaults if not present
-            // ptrEl.dia = ptrEl.dia
-            //     ? parseInt(ptrEl.dia)
-            //     : parseInt(srchLts.settings.dia)
-
-            // ptrEl.blend = ptrEl.blend ? ptrEl.blend : srchLts.settings.blend
-
-            // ptrEl.blur = ptrEl.blur
-            //     ? ptrEl.blur
-            //     : parseFloat(srchLts.settings.blur)
-            // ptrEl.opacity = isNaN(parseFloat(ptrEl.opacity))
-            //     ? parseFloat(ptrEl.opacity)
-            //     : parseFloat(srchLts.settings.opacity)
-            // ptrEl.easing = ptrEl.easing ? ptrEl.easing : srchLts.settings.easing
-            // ptrEl.timing = ptrEl.timing
-            //     ? parseInt(ptrEl.timing)
-            //     : parseInt(srchLts.settings.timing)
-
-            // console.log(ptrEl)
+            canvas.className = slts.m.fnStringifyClassArray(
+                ptrEl.classes,
+                sTargetClass
+            )
 
             // copy the current ptrEl into a new object
             const copyPtrEl = { ...ptrEl }
+
             // remove the classes array
             delete copyPtrEl.classes
 
@@ -398,12 +432,10 @@ window.searchLights = (function (options) {
                 }
             }
             // Attach it to the DOM
-            srchLts.settings.attachedEl
-                ? srchLts.settings.attachedEl.prepend(canvas)
-                : ''
+            slts.srchLtsParentNode ? slts.srchLtsParentNode.prepend(canvas) : ''
         })
         // refresh the nodeList of searchlight elements now in the DOM
-        allSrcLts = document.querySelectorAll(targetClass)
+        allSrcLts = document.querySelectorAll(sTargetClass)
         return allSrcLts ? allSrcLts : -1
     }
 
@@ -413,20 +445,20 @@ window.searchLights = (function (options) {
      * @param {*} canvasEl
      * @returns context object, with element data attrs attached
      */
-    srchLts.create2dCtx = function (canvasEl) {
+    slts.m._fnCreateCtx = function (canvasEl) {
         // Teset for canvas DOM element
         if (canvasEl.tagName !== 'CANVAS') return
 
-        const dia = Math.abs(
-            parseInt(canvasEl.dataset.dia || srchLts.settings.dia)
+        const _dia = Math.abs(
+            parseInt(canvasEl.dataset.dia || slts.settings.dia)
         )
-        const blur = Math.abs(
-            parseFloat(canvasEl.dataset.blur || srchLts.settings.blur)
+        const _blur = Math.abs(
+            parseInt(canvasEl.dataset.blur || slts.settings.blur)
         )
 
         // Set height and width of canvas element
-        canvasEl.width = dia + blur * 2
-        canvasEl.height = dia + blur * 2
+        canvasEl.width = _dia + _blur * 2
+        canvasEl.height = _dia + _blur * 2
 
         const ctx = canvasEl.getContext('2d')
 
@@ -435,7 +467,7 @@ window.searchLights = (function (options) {
 
         /**
          *
-         * Here we need to merge in defaults if not present in ctx.srchLt
+         * Here we need to merge in Defaults if not present in ctx.srchLt
          *
          */
 
@@ -447,19 +479,19 @@ window.searchLights = (function (options) {
      *
      * @param {*} ctx
      */
-    srchLts.drawCtx = function (ctx) {
+    slts.m.fnDrawCtx = function (ctx) {
         if (ctx.constructor.name !== 'CanvasRenderingContext2D') return
 
-        const dia = ctx.srchLt.dia
-        const blur = parseFloat(ctx.srchLt.blur)
+        const _dia = ctx.srchLt.dia
+        const _blur = parseInt(ctx.srchLt.blur)
         ctx.fillStyle = ctx.srchLt.color
-        ctx.filter = 'blur(' + parseInt(ctx.srchLt.blur) + 'px)'
+        ctx.filter = 'blur(' + _blur + 'px)'
         ctx.beginPath()
         ctx.closePath()
         ctx.arc(
-            dia / 2 + blur,
-            dia / 2 + blur,
-            Math.abs(dia / 2),
+            _dia / 2 + _blur,
+            _dia / 2 + _blur,
+            Math.abs(_dia / 2),
             0,
             Math.PI * 2
         )
@@ -467,145 +499,167 @@ window.searchLights = (function (options) {
     }
 
     /**
-     * Pointer enter callback
+     * Show the srchLt elements
+     *
+     * we can get away with using nodeList.forEach as it actyally has better support then mix-blend-mode (Edge 15)
+     * https://caniuse.com/css-mixblendmode / https://caniuse.com/?search=nodeList.forEach
      *
      * @param {*} e
      * @param {*} nodeList
      */
-    srchLts.showSrchLts = function (e, nodeList) {
-        if (!isNodeList(nodeList)) return
+    slts.m.fnSrchLtElsShow = function (e, nodeList) {
+        if (!_fnIsNodeList(nodeList)) return
+
+        // return typeof nodeList.item !== 'undefined'
         nodeList.forEach(function (el) {
-            el.style.opacity = el.dataset.opacity || srchLts.settings.opacity
+            el.style.display = 'initial'
+            el.style.opacity = el.dataset.opacity || slts.settings.opacity
         })
     }
 
     /**
-     * Pointer exit callback
+     * Hide the srchLt elements with opacity and display:none incase they interfer with pointer interactions
+     *
+     * We can get away with using nodeList.forEach as it actually has better support then mix-blend-mode (Edge 15)
+     * https://caniuse.com/css-mixblendmode / https://caniuse.com/?search=nodeList.forEach
      *
      * @param {*} nodeList
      */
-    srchLts.hideSrchLts = function (e, nodeList) {
-        if (!isNodeList(nodeList)) return
+    slts.m.fnSrchLtElsHide = function (e, nodeList) {
+        // if (!_fnIsNodeList(nodeList)) return
         nodeList.forEach(function (el) {
-            if (srchLts.enableShowHide) {
+            if (slts.bEnableShowHide) {
+                // dial down the opacity
                 el.style.opacity = '0'
+
+                // Grab timing value of current element
+                const _timing = el.dataset.timing || slts.settings.timing
+
+                // remove it from the DOM after transistion
+                slts.m.fnDbnce(function () {
+                    el.style.display = 'none'
+                }, _timing)()
             }
         })
     }
 
     /**
-     * Adjusts the style property of a provided element so that the cursor is centered by default.
+     * Adjusts the style property of a srchLt element so that the cursor is centered over it by default.
+     * Uses translate3d in order to trigger hardware exceleration
      *
      * @param {*} el
      */
-    srchLts.centerOnPtr = function (el) {
-        if (!isDOM(el)) return
+    slts.m.fnCenterOnPtr = function (el) {
+        if (!_fnIsDOM(el)) return
         el.style.transform =
-            'translate( ' + -el.width / 2 + 'px, ' + -el.height / 2 + 'px)'
+            'translate3d(  ' +
+            -el.width / 2 +
+            'px, ' +
+            -el.height / 2 +
+            'px, 0)'
     }
 
     /**
      * Pointer  Callbacks.
      */
-    srchLts.ptrMoveCallbk = function () {}
-    srchLts.ptrLeaveCallbk = function () {}
-    srchLts.ptrEnterCallbk = function () {}
+    slts.fnPtrMoveCallbk = function () {}
+    slts.fnPtrLeaveCallbk = function () {}
+    slts.fnPtrEnterCallbk = function () {}
 
     /**
      * Custom Pointer Events
      */
-    srchLts.ptrHalted = new CustomEvent('srchLtsPtrHalted', {
+    slts._ptrMove = new CustomEvent('srchLtsMove', {
         detail: {
-            pointerMotion: false,
+            pointerMotion: true,
         },
     })
 
-    const ptrOverEls = function (els) {}
     /**
-     * Sets up pointer event listeners onto the srchLts.settings.attach element
+     * Sets up pointer event listeners onto the slts.settings.attach element
      *
      * @param {*} settings
      */
-    srchLts.eventSetup = function () {
-        const ptrs = srchLts.ptrs
-        const el = srchLts.settings.attachedEl
+    slts.m.fnEventSetup = function () {
+        const _ptrs = slts.srchLtsElsNodeList
+        const _node = slts.srchLtsParentNode
 
         // register the event listener
-        el.onpointermove = (e) => {
+        _node.onpointermove = (e) => {
             // Track the pointer
-            srchLtsFollow(e, srchLts.ptrs)
-            srchLts.ptrMoveCallbk()
-            el.dispatchEvent(srchLts.ptrHalted)
+            slts.m.fnFollowPtr(e, _ptrs)
+            slts.fnPtrMoveCallbk(e, slts)
+            _node.dispatchEvent(slts._ptrMove)
         }
-        el.onpointerenter = (e) => {
-            srchLts.showSrchLts(e, srchLts.ptrs)
-            srchLts.ptrEnterCallbk(e, srchLts)
+        _node.onpointerenter = (e) => {
+            slts.m.fnSrchLtElsShow(e, _ptrs)
+            slts.fnPtrEnterCallbk(e, slts)
         }
-        el.onpointerleave = (e) => {
-            srchLts.hideSrchLts(e, srchLts.ptrs)
-            srchLts.ptrLeaveCallbk(e, srchLts)
+        _node.onpointerleave = (e) => {
+            slts.m.fnSrchLtElsHide(e, _ptrs)
+            slts.fnPtrLeaveCallbk(e, slts)
         }
     }
 
     /**
-     * A destroy method
+     * _Destroy method
      * removes event listeners
      * removes elements from DOM
      * Clears settings & options and ptrs objects
      */
-    srchLts.destroy = function () {
+    slts._destroy = function () {
         // Make sure we have already been initialised
-        if (!srchLts.settings) return
+        if (!slts.settings) return
 
         // Remove event listeners
-        document.removeEventListener('onpointermove', srchLtsFollow, false)
+        document.removeEventListener('onpointermove', slts.m.fnFollowPtr, false)
         document.removeEventListener(
             'onpointerenter',
-            srchLts.showSrchLts,
+            slts.m.fnSrchLtElsShow,
             false
         )
         document.removeEventListener(
             'onpointerleave',
-            srchLts.hideSrchLts,
+            slts.m.fnSrchLtElsHide,
             false
         )
 
         // Remove elements from DOM
-        srchLts.ptrs.forEach(function (el) {
+        slts.srchLtsElsNodeList.forEach(function (el) {
             el.remove()
         })
 
-        // Nuke run time objects: settings, ptrs
-        srchLts.options = undefined
-        srchLts.settings = undefined
-        srchLts.ptrs = undefined
+        // Nuke run time objects: settings, nodeLists ect
+        slts.options = undefined
+        slts.settings = undefined
+        slts.srchLtsElsNodeList = undefined
     }
 
     /**
-     * Public init function
+     * Public _Init method
      *
      * @param {*} options
      */
-    srchLts.init = function (opts) {
-        // destroy any preexsiting initialisation
-        srchLts.destroy()
+    slts._init = function (oOpts) {
+        // _Destroy any preexsiting initialisation
+        slts._destroy()
 
         // Bail if browser dosen't support blending modes (see notes on safari)
-        if (!supportsBlend()) return
+        if (!_fnSupportsBlend()) return
 
-        // Merge defaults and user options into new srchLts.settings object
-        buildSettingsObj(opts)
+        // Merge Defaults and user options into new slts.settings object
+        _fnBuildSettingsObj(oOpts)
 
         // Draw each searchlight and add it to the DOM
-        assembleSrchLtPtrs()
+        _fnAssembleSrchLtPtrs()
 
         // Set up event listeners
-        srchLts.eventSetup()
+        slts.m.fnEventSetup()
 
         // return updated srchLts object
-        return srchLts
+        return slts
     }
 
-    // make the srcLts our public API
-    return srchLts
+    // srcLts as public API
+    return slts
 })()
