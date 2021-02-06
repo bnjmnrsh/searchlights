@@ -195,18 +195,19 @@ window.searchLights = (function (options) {
         // see if there are any searchLight elements in the DOM, if so remove the default ones
         const nlDOMsrcLts = document.querySelectorAll(sL.sTargetClass)
 
-        let aDefPtrEls = [...Defaults.srchLtEls]
+        // copy the Defaults obj
+        let oDefaultsCopy = Object.assign(Defaults)
 
         if (nlDOMsrcLts && nlDOMsrcLts.length) {
             // set a global flag to signify pre-exsitsing DOM elements found
             sL._bIsDOM = true
 
-            // Remove them from defaults
-            Defaults.srchLtEls = undefined
+            // Remove the template serchLtEls so they are not added
+            delete oDefaultsCopy.srchLtEls
         }
 
-        // create a new settings obj by merge the incoming options with Defaults
-        sL.settings = Object.assign({}, Defaults, sL.options)
+        // create a new settings obj by merge the incoming options with oDefaultsCopy
+        sL.settings = Object.assign({}, oDefaultsCopy, sL.options)
 
         // If the user didn't provide options.srchLtEls, or only partial options
         // then we merge any missing top level options into each el as default values.
@@ -218,11 +219,6 @@ window.searchLights = (function (options) {
                 delete srchLtEl.srchLtEls
                 sL.settings.srchLtEls[i] = srchLtEl
             })
-        }
-
-        // return the default searchlight elements to the Defaults obj
-        if (aDefPtrEls) {
-            Defaults.srchLtEls = [...aDefPtrEls]
         }
 
         // Now that we have set up Defaults, grab the parent to attach to
