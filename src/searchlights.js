@@ -520,6 +520,26 @@ window.searchLights = (function (options) {
     }
 
     /**
+     * Build DOM nodes
+     *
+     * @todo BUG This will rebuild, but also pulls in _Defaults.srchLtEls
+     *
+     * @param {*} [nl=sL._nlHasDOMels]
+     * @returns sL
+     */
+    sL._build = function (nl = sL._nlHasDOMels, nTarget = '') {
+        // if we've been given a target use it, otherwise look for our custom property in node object
+        nl.forEach(function (n, i) {
+            if (_fnIsDOM(nTarget)) {
+                nl[i].nTarget.appendChild(n)
+            } else if (_fnIsDOM(nl[i].slOrgParentNode)) {
+                nl[i].slOrgParentNode.appendChild(n)
+            }
+        })
+        return sL
+    }
+
+    /**
      * Public destroy method
      * removes event listeners
      * removes elements from DOM
