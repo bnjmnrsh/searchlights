@@ -33,7 +33,7 @@ window.searchLights = (function (options) {
         color: undefined,
         zindex: 0,
     }
-    Defaults.ptrEls = [
+    Defaults.srchLtEls = [
         {
             classes: ['red'],
             color: 'rgb(255,0,0)',
@@ -195,34 +195,34 @@ window.searchLights = (function (options) {
         // see if there are any searchLight elements in the DOM, if so remove the default ones
         const nlDOMsrcLts = document.querySelectorAll(sL.sTargetClass)
 
-        let aDefPtrEls = [...Defaults.ptrEls]
+        let aDefPtrEls = [...Defaults.srchLtEls]
 
         if (nlDOMsrcLts && nlDOMsrcLts.length) {
             // set a global flag to signify pre-exsitsing DOM elements found
             sL._bIsDOM = true
 
             // Remove them from defaults
-            Defaults.ptrEls = undefined
+            Defaults.srchLtEls = undefined
         }
 
         // create a new settings obj by merge the incoming options with Defaults
         sL.settings = Object.assign({}, Defaults, sL.options)
 
-        // If the user didn't provide options.ptrEls, or only partial options
+        // If the user didn't provide options.srchLtEls, or only partial options
         // then we merge any missing top level options into each el as default values.
-        if (oOpts && oOpts.options.ptrEls !== undefined) {
-            sL.settings.ptrEls.forEach((ptrEl, i) => {
-                ptrEl = Object.assign(ptrEl, oOpts.options.ptrEls[i])
-                ptrEl = Object.assign({}, Defaults, ptrEl)
+        if (oOpts && oOpts.options.srchLtEls !== undefined) {
+            sL.settings.srchLtEls.forEach((srchLtEl, i) => {
+                srchLtEl = Object.assign(srchLtEl, oOpts.options.srchLtEls[i])
+                srchLtEl = Object.assign({}, Defaults, srchLtEl)
                 // prevent Inception moment
-                delete ptrEl.ptrEls
-                sL.settings.ptrEls[i] = ptrEl
+                delete srchLtEl.srchLtEls
+                sL.settings.srchLtEls[i] = srchLtEl
             })
         }
 
         // return the default searchlight elements to the Defaults obj
         if (aDefPtrEls) {
-            Defaults.ptrEls = [...aDefPtrEls]
+            Defaults.srchLtEls = [...aDefPtrEls]
         }
 
         // Now that we have set up Defaults, grab the parent to attach to
@@ -235,7 +235,7 @@ window.searchLights = (function (options) {
     const _fnAssembleSrchLtEls = function () {
         // Attach the pointer elements to the DOM
         sL.srchLtsElsNodeList = sL.m.fnCreateSrchLtEls(
-            sL.settings.ptrEls,
+            sL.settings.srchLtEls,
             sL.sTargetClass
         )
 
