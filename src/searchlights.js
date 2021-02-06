@@ -183,31 +183,39 @@ window.searchLights = (function (options) {
      * Create the sL.options object
      * by combining any provided user options with the _Defaults object.
      *
-     * @param {*} oOpts
+     * @param {*} oOptions
      */
-    const _fnBuildOptionsObj = function (oOpts) {
+    const _fnBuildOptionsObj = function (oOptions) {
         // Allow user to overrideing many API method with custom version, and merge in options object.
-        sL = Object.assign(sL, oOpts)
-
-        // see if there are any searchLight elements in the DOM, if so remove the default ones
-        sL._nlHasDOM = document.querySelectorAll(sL.sTargetClass)
+        sL = Object.assign(sL, oOptions)
 
         // copy the _Defaults obj
         let oDefaultsCopy = { ..._Defaults }
 
-        if (sL._nlHasDOM.length) {
+        if (!sL._nlHasDOMels || (oOptions && 'srchLtEls' in oOptions)) {
             // Remove the template serchLtEls so they are not added
             delete oDefaultsCopy.srchLtEls
-        }
 
+            const nlCurrentEls = document.querySelectorAll(sL.sTargetClass)
+            sL._nlHasDOMels = [...nlCurrentEls]
+
+            sL._nlHasDOMels.forEach(function (n, i) {
+                n.slOrgParentNode = sL._nlHasDOMels[i].parentNode
+                n.slOrgPeviousElementSibling =
+                    sL._nlHasDOMels[i].previousElementSibling
+            })
+        }
         // create a new settings obj by merge the incoming options with oDefaultsCopy
         sL.settings = Object.assign({}, oDefaultsCopy, sL.options)
 
         // If the user didn't provide options.srchLtEls, or only partial options
         // then we merge any missing top level options into each el as default values.
-        if (oOpts && oOpts.options.srchLtEls !== undefined) {
+        if (oOptions && oOptions.options.srchLtEls !== undefined) {
             sL.settings.srchLtEls.forEach((srchLtEl, i) => {
-                srchLtEl = Object.assign(srchLtEl, oOpts.options.srchLtEls[i])
+                srchLtEl = Object.assign(
+                    srchLtEl,
+                    oOptions.options.srchLtEls[i]
+                )
                 srchLtEl = Object.assign({}, oDefaultsCopy, srchLtEl)
                 // prevent Inception moment that creates a data-srchltels attr
                 delete srchLtEl.srchLtEls
@@ -427,7 +435,6 @@ window.searchLights = (function (options) {
     sL.m.fnSrchLtElsShow = function (e, nodeList) {
         if (!_fnIsNodeList(nodeList)) return
 
-        // return typeof nodeList.item !== 'undefined'
         nodeList.forEach(function (el) {
             el.style.display = 'initial'
             el.style.opacity = el.dataset.opacity || sL.settings.opacity
@@ -484,28 +491,32 @@ window.searchLights = (function (options) {
     sL.fnPtrEnterCallbk = function () {}
 
     /**
+     * Event Listerner functions
+     */
+    const _fnPointerFollow = function (e) {
+        sL.m.fnFollowPtr(e, sL.srchLtsElsNodeList)
+        sL.fnPtrMoveCallbk(e, sL)
+    }
+    const _fnPointerEnter = function (e) {
+        sL.m.fnSrchLtElsShow(e, sL.srchLtsElsNodeList)
+        sL.fnPtrEnterCallbk(e, sL)
+    }
+    const _fnPointerLeave = function (e) {
+        sL.m.fnSrchLtElsHide(e, sL.srchLtsElsNodeList)
+        sL.fnPtrLeaveCallbk(e, sL)
+    }
+
+    /**
      * Sets up pointer event listeners onto the sL.settings.attach element
      *
      * @param {*} settings
      */
     sL.m.fnEventSetup = function () {
-        const ptrs = sL.srchLtsElsNodeList
         const node = sL._nSrchLtsParentNode
 
-        // register the event listener
-        node.onpointermove = (e) => {
-            // Track the pointer
-            sL.m.fnFollowPtr(e, ptrs)
-            sL.fnPtrMoveCallbk(e, sL)
-        }
-        node.onpointerenter = (e) => {
-            sL.m.fnSrchLtElsShow(e, ptrs)
-            sL.fnPtrEnterCallbk(e, sL)
-        }
-        node.onpointerleave = (e) => {
-            sL.m.fnSrchLtElsHide(e, ptrs)
-            sL.fnPtrLeaveCallbk(e, sL)
-        }
+        node.addEventListener('pointermove', _fnPointerFollow, false)
+        node.addEventListener('pointerEnter', _fnPointerEnter, false)
+        node.addEventListener('pointerleave', _fnPointerLeave, false)
     }
 
     /**
@@ -518,18 +529,12 @@ window.searchLights = (function (options) {
         // Make sure we have already been initialised
         if (!sL.settings) return
 
+        const node = sL._nSrchLtsParentNode
+
         // Remove event listeners
-        document.removeEventListener('onpointermove', sL.m.fnFollowPtr, false)
-        document.removeEventListener(
-            'onpointerenter',
-            sL.m.fnSrchLtElsShow,
-            false
-        )
-        document.removeEventListener(
-            'onpointerleave',
-            sL.m.fnSrchLtElsHide,
-            false
-        )
+        node.removeEventListener('pointermove', _fnPointerFollow, false)
+        node.removeEventListener('pointerenter', _fnPointerEnter, false)
+        node.removeEventListener('pointerleave', _fnPointerLeave, false)
 
         // Remove elements from DOM
         sL.srchLtsElsNodeList.forEach(function (el) {
@@ -540,6 +545,8 @@ window.searchLights = (function (options) {
         delete sL.options
         delete sL.settings
         delete sL.srchLtsElsNodeList
+
+        return sL
     }
 
     /**
@@ -547,7 +554,7 @@ window.searchLights = (function (options) {
      *
      * @param {*} options
      */
-    sL._init = function (oOpts) {
+    sL._init = function (oOptions) {
         // Destroy any preexsiting initialisation
         sL._destroy()
 
@@ -555,7 +562,7 @@ window.searchLights = (function (options) {
         if (!_fnSupportsBlend()) return
 
         // Merge Defaults and user options into new sL.settings object
-        _fnBuildOptionsObj(oOpts)
+        _fnBuildOptionsObj(oOptions)
 
         // Add the base styles to head if bUseInlineStyles
         if (sL.bUseInlineStyles) _fnSetBaseStyles()
