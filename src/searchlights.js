@@ -1,58 +1,6 @@
 /**
  * searchlights.js
  *
- * todo list
- * @todo consistantly sanitise or parse every output param before it hits the DOM. . .
- * @todo hungarian notation (in progress) - http://cws.cengage.co.uk/rautenbach/students/ancillary_content/hungarian_notation.pdf
- * @todo Consider a constructor to be able to create more then one.
- *
- * @todo onpointermove, vs onmousemove - onpointermove is janky on FF, but using onmousemove means that pointers aren't registered. Detect is user is using pointer?
- * https://github.com/rafgraph/event-from, https://github.com/rafgraph/detect-it
- *
- * @todo On safari, the drawn borders are not blured - fake it with drop shadow?
- *
- * @todo convert nodeList.forEach() to Array.prototype.slice.call() for better backward compatibilty, if we were to use this with (for example) just css or perhaps SVG approaches.
- *
- * @todo Bug with timing, being passed through as string, should be an int. (we turn it into a string anyway tho...)
- * @todo Believe that the ctx element is not getting all the default values. line 418
- *
- * @todo Detect when the pointer is over an array of dom elemetns and optionally hide the element.
- *
- * @todo look at dynamically calling methods based on the data-* attr name. https://www.sitepoint.com/call-javascript-function-string-without-using-eval/
- *       This would be usefull for regenerating new dom elemtnts based on exsisting data-* values. ie
- *       given data-opacity='.5' check if a method exsists and if so run srchlte.opacity(el, .5)
- *
- * @todo add z-index to list of params (in progress)
- * @todo add flag for the type of elemet to be made. Global? only or on a per elemtne basis? hummmmm
- * @todo consider being able to disable inline classes on a per elemtnt basis.
- *
- * @todo make sure that when adding elements to the DOM it is done in such a way as to minimise redraw/reflow
- *
- * @todo Better handeling of pointers first appearance on screen (now they sit at 00 untill poiner event.)
- *
- * @done Consider removing escape hatch if DOM elements already exsist. This could prevent us from createing algorithmic configs in future.
- * @done Assess if rather then tracking if the mouse leaves body to show/hide, instead if it leaves the 'attach' target with custom event? / changes made to srchLts.m.fnEventSetup
- *
- *
- * These might be best as an experiment in extending the plugin:
- * @todo Automatically calculate degrees of seperation for n searchlights
- * @todo Automatically calculate off center seperation of searchlights provided a distance value
- * @todo Optionally be able to converge searchlights to 0 (cursor tip) after the cursor pauses
- *
- * @done Ensure that any provided options are dynamically turned into data-* attributes
- * @done If we are inlining styes on the elemetn, we should create the basic stylesheet on the fly.
- * @done destroy method for cleanup . . .
- * @done Be able to specify in options what element the pointers should be prepended to // done with 'attach' option
- * @done Consider using a refrence to the actual ptr DOM element computed width and height rather try to calculate center settings.
- * This will keep the pointer centered even if the values are changed with js later.
- * @done refactor m.fnCreateSrchLtEls() to allow numeric 0 values from data-*
- * @done refactor the merging of Defaults and options into the settings object.
- *
- * @wont Consider ways to adjust layering order. Is z-index easiest? // achivable with callback or event listener.
- * @wont Optionally be able to shuffle or randomise the css transition value for each searchlight after cursor pause to make it behavior less predictable // could be done with css and external js
- * -->https://css-tricks.com/newsletter/236-initialisms-and-layout-shifts/ && https://imagineer.in/blog/stacking-context-with-opacity/
- * @wont ::before ::after psudo elemnts in order to transition blending mode on cursor stop? // could be achieved with css, so added flag to disable inline styles.
- *
  * @param {*} optons
  *
  */
@@ -247,7 +195,7 @@ window.searchLights = (function (options) {
         // see if there are any searchLight elements in the DOM, if so remove the default ones
         const _nlDOMsrcLts = document.querySelectorAll(slts.sTargetClass)
 
-        let _aDefPtrEls = Defaults.ptrEls.slice()
+        let _aDefPtrEls = [...Defaults.ptrEls]
 
         if (_nlDOMsrcLts && _nlDOMsrcLts.length) {
             // set a global flag to signify pre-exsitsing DOM elements found
@@ -305,7 +253,7 @@ window.searchLights = (function (options) {
             if (!_fnIsDOM(_el)) return
 
             // create the 2d conext
-            const _oCtx = slts.m._fnCreateCtx(_el, slts)
+            const _oCtx = slts.m.fnCreateCtx(_el, slts)
 
             // Set each _element's specific styles
             slts.m.fnCenterOnPtr(_el)
@@ -333,13 +281,13 @@ window.searchLights = (function (options) {
      * @param {*} _e
      * @param {*} _nNodeList
      */
-    slts.m.fnFollowPtr = function (_e, _nNodeList) {
-        if (!_fnIsNodeList(_nNodeList)) return
+    slts.m.fnFollowPtr = function (_e, _nl) {
+        if (!_fnIsNodeList(_nl)) return
 
-        _nNodeList.forEach(function (_el) {
+        _nl.forEach(function (_el) {
             _el.style.left = _e.pageX + 'px'
             _el.style.top = _e.pageY + 'px'
-            slts.m.fnSrchLtElsShow(_el, _nNodeList)
+            slts.m.fnSrchLtElsShow(_el, _nl)
         })
     }
 
@@ -394,19 +342,6 @@ window.searchLights = (function (options) {
      * @returns [*] NodeList of canvas elements in DOM
      */
     slts.m.fnCreateSrchLtEls = function (aPtrEls = [], sTargetClass) {
-        // let allSrcLts = document.querySelectorAll(sTargetClass)
-
-        // // If elements are already in the DOM return them set _fnIsDOM flag
-        // // And store the default pointer in a temp varriable
-        // if (allSrcLts && allSrcLts.length) {
-        //     slts._fnIsDOM = true
-        //     const _aDefPtrEls = [...Defaults.ptrEls]
-        //     // Remove it from defaults
-        //     delete Defaults.ptrEls
-        // }
-
-        console.log(aPtrEls)
-
         // Otherwise create them
         aPtrEls.forEach(function (ptrEl) {
             const canvas = document.createElement('canvas')
@@ -445,7 +380,7 @@ window.searchLights = (function (options) {
      * @param {*} canvasEl
      * @returns context object, with element data attrs attached
      */
-    slts.m._fnCreateCtx = function (canvasEl) {
+    slts.m.fnCreateCtx = function (canvasEl) {
         // Teset for canvas DOM element
         if (canvasEl.tagName !== 'CANVAS') return
 
