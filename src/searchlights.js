@@ -98,7 +98,6 @@ window.searchLights = (function (options) {
      * @returns boolean
      */
     const _fnSupportsBlend = function () {
-        document.body.mixBlendMode = false
         const bSupported =
             typeof window.getComputedStyle(document.body).mixBlendMode !==
             'undefined'
@@ -107,16 +106,14 @@ window.searchLights = (function (options) {
     }
 
     /**
-     * Builds the base syles for searchLights
-     * Returns the style element node to be attached to the DOM
+     * Builds the base syles for searchLights and prepends them to the head
      *
-     * @param {*} sClassName | searchLight elements class
      * @returns DOM style element with content
      */
-    const _fnSetBaseStyles = function (sClassName = sL.sTargetClass) {
+    const _fnSetBaseStyles = function () {
         const nBaseStyleEl = document.createElement('style')
-        nBaseStyleEl.innerHTML = `.mix-blend-mode ${sClassName} { position: absolute; will-change: transform; }`
-        return nBaseStyleEl
+        nBaseStyleEl.innerHTML = `.mix-blend-mode ${sL.sTargetClass} { position: absolute; will-change: transform, opacity; }`
+        document.head.insertAdjacentElement('afterbegin', nBaseStyleEl)
     }
 
     /**
@@ -212,9 +209,6 @@ window.searchLights = (function (options) {
             sL.settings.srchLtEls.forEach((srchLtEl, i) => {
                 srchLtEl = Object.assign(srchLtEl, oOpts.options.srchLtEls[i])
                 srchLtEl = Object.assign({}, oDefaultsCopy, srchLtEl)
-                // prevent Inception moment
-                // delete srchLtEl.srchLtEls
-                console.log(srchLtEl.srchLtEls)
                 sL.settings.srchLtEls[i] = srchLtEl
             })
         }
@@ -227,13 +221,6 @@ window.searchLights = (function (options) {
      * Add searchLight elements to DOM, apply inline styles, and render the Context.
      */
     const _fnAssembleSrchLtEls = function () {
-        // if bUseInlineStyles is true, add the base styles to head
-        if (sL.bUseInlineStyles) {
-            document.head.insertAdjacentElement(
-                'afterbegin',
-                _fnSetBaseStyles(sL.sTargetClass)
-            )
-        }
         // Create nodeList of searchLight elememts
         sL.srchLtsElsNodeList = sL.m.fnCreateSrchLtEls(
             sL.settings.srchLtEls,
@@ -567,6 +554,9 @@ window.searchLights = (function (options) {
 
         // Merge Defaults and user options into new sL.settings object
         _fnBuildOptionsObj(oOpts)
+
+        // Add the base styles to head if bUseInlineStyles
+        if (sL.bUseInlineStyles) _fnSetBaseStyles()
 
         // Draw each searchlight and add it to the DOM
         _fnAssembleSrchLtEls()
