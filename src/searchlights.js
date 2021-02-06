@@ -209,6 +209,8 @@ window.searchLights = (function (options) {
             sL.settings.srchLtEls.forEach((srchLtEl, i) => {
                 srchLtEl = Object.assign(srchLtEl, oOpts.options.srchLtEls[i])
                 srchLtEl = Object.assign({}, oDefaultsCopy, srchLtEl)
+                // prevent Inception moment that creates a data-srchltels attr
+                delete srchLtEl.srchLtEls
                 sL.settings.srchLtEls[i] = srchLtEl
             })
         }
