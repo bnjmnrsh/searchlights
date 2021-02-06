@@ -21,7 +21,7 @@ window.searchLights = (function (options) {
     sL.bEnableShowHide = true
 
     // Default element values
-    const Defaults = {
+    const _Defaults = {
         blur: 3,
         dia: 100,
         blend: 'screen',
@@ -33,32 +33,32 @@ window.searchLights = (function (options) {
         color: undefined,
         zindex: 0,
     }
-    Defaults.srchLtEls = [
+    _Defaults.srchLtEls = [
         {
             classes: ['red'],
             color: 'rgb(255,0,0)',
-            dia: Defaults.dia,
-            blur: Defaults.blur,
-            blend: Defaults.blend,
-            opacity: Defaults.opacity,
+            dia: _Defaults.dia,
+            blur: _Defaults.blur,
+            blend: _Defaults.blend,
+            opacity: _Defaults.opacity,
             timing: 400,
         },
         {
             classes: ['green'],
             color: 'rgb(0,255,0)',
-            dia: Defaults.dia,
-            blur: Defaults.blur,
-            blend: Defaults.blend,
-            opacity: Defaults.opacity,
+            dia: _Defaults.dia,
+            blur: _Defaults.blur,
+            blend: _Defaults.blend,
+            opacity: _Defaults.opacity,
             timing: 425,
         },
         {
             classes: ['blue'],
             color: 'rgb(0,0,255)',
-            dia: Defaults.dia,
-            blur: Defaults.blur,
-            blend: Defaults.blend,
-            opacity: Defaults.opacity,
+            dia: _Defaults.dia,
+            blur: _Defaults.blur,
+            blend: _Defaults.blend,
+            opacity: _Defaults.opacity,
             timing: 475,
         },
     ]
@@ -97,7 +97,7 @@ window.searchLights = (function (options) {
      *
      * @returns boolean
      */
-    const _fnSupportsBlend = function() {
+    const _fnSupportsBlend = function () {
         document.body.mixBlendMode = false
         const bSupported =
             typeof window.getComputedStyle(document.body).mixBlendMode !==
@@ -184,7 +184,7 @@ window.searchLights = (function (options) {
 
     /**
      * Create the sL.options object
-     * by combining any provided user options with the Defaults object.
+     * by combining any provided user options with the _Defaults object.
      *
      * @param {*} oOpts
      */
@@ -193,15 +193,12 @@ window.searchLights = (function (options) {
         sL = Object.assign(sL, oOpts)
 
         // see if there are any searchLight elements in the DOM, if so remove the default ones
-        const nlDOMsrcLts = document.querySelectorAll(sL.sTargetClass)
+        sL._nlHasDOM = document.querySelectorAll(sL.sTargetClass)
 
-        // copy the Defaults obj
-        let oDefaultsCopy = Object.assign(Defaults)
+        // copy the _Defaults obj
+        let oDefaultsCopy = { ..._Defaults }
 
-        if (nlDOMsrcLts && nlDOMsrcLts.length) {
-            // set a global flag to signify pre-exsitsing DOM elements found
-            sL._bIsDOM = true
-
+        if (sL._nlHasDOM.length) {
             // Remove the template serchLtEls so they are not added
             delete oDefaultsCopy.srchLtEls
         }
@@ -214,27 +211,22 @@ window.searchLights = (function (options) {
         if (oOpts && oOpts.options.srchLtEls !== undefined) {
             sL.settings.srchLtEls.forEach((srchLtEl, i) => {
                 srchLtEl = Object.assign(srchLtEl, oOpts.options.srchLtEls[i])
-                srchLtEl = Object.assign({}, Defaults, srchLtEl)
+                srchLtEl = Object.assign({}, oDefaultsCopy, srchLtEl)
                 // prevent Inception moment
-                delete srchLtEl.srchLtEls
+                // delete srchLtEl.srchLtEls
+                console.log(srchLtEl.srchLtEls)
                 sL.settings.srchLtEls[i] = srchLtEl
             })
         }
 
         // Now that we have set up Defaults, grab the parent to attach to
-        sL._oSrchLtsParentNode = document.querySelector(sL.sParentEl)
+        sL._nSrchLtsParentNode = document.querySelector(sL.sParentEl)
     }
 
     /**
      * Add searchLight elements to DOM, apply inline styles, and render the Context.
      */
     const _fnAssembleSrchLtEls = function () {
-        // Attach the pointer elements to the DOM
-        sL.srchLtsElsNodeList = sL.m.fnCreateSrchLtEls(
-            sL.settings.srchLtEls,
-            sL.sTargetClass
-        )
-
         // if bUseInlineStyles is true, add the base styles to head
         if (sL.bUseInlineStyles) {
             document.head.insertAdjacentElement(
@@ -242,6 +234,11 @@ window.searchLights = (function (options) {
                 _fnSetBaseStyles(sL.sTargetClass)
             )
         }
+        // Create nodeList of searchLight elememts
+        sL.srchLtsElsNodeList = sL.m.fnCreateSrchLtEls(
+            sL.settings.srchLtEls,
+            sL.sTargetClass
+        )
 
         // draw each element
         sL.srchLtsElsNodeList.forEach(function (el) {
@@ -362,7 +359,10 @@ window.searchLights = (function (options) {
                 }
             }
             // Attach it to the DOM
-            sL._oSrchLtsParentNode ? sL._oSrchLtsParentNode.prepend(nCanvas) : ''
+
+            sL._nSrchLtsParentNode
+                ? sL._nSrchLtsParentNode.prepend(nCanvas)
+                : ''
         })
         // refresh the nodeList of searchlight elements now in the DOM
         const nlAllSrcLtsEls = document.querySelectorAll(sTargetClass)
@@ -501,7 +501,7 @@ window.searchLights = (function (options) {
      */
     sL.m.fnEventSetup = function () {
         const ptrs = sL.srchLtsElsNodeList
-        const node = sL._oSrchLtsParentNode
+        const node = sL._nSrchLtsParentNode
 
         // register the event listener
         node.onpointermove = (e) => {
@@ -548,9 +548,9 @@ window.searchLights = (function (options) {
         })
 
         // Nuke run time objects: settings, nodeLists ect
-        sL.options = undefined
-        sL.settings = undefined
-        sL.srchLtsElsNodeList = undefined
+        delete sL.options
+        delete sL.settings
+        delete sL.srchLtsElsNodeList
     }
 
     /**
