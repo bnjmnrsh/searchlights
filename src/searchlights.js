@@ -78,9 +78,7 @@ window.searchLights = (function (options) {
      * @param {nodeList} nl
      * @returns {boolean}
      */
-    const _fnIsNodeList = (nl) => {
-        return nl ? typeof nl.item !== 'undefined' : false
-    }
+    const _fnIsNodeList = (nl) => (nl ? typeof nl.item !== 'undefined' : false)
 
     /**
      * Checks if the browser reports supporting mixBlendingMode
