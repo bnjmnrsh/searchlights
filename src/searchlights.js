@@ -519,7 +519,7 @@ window.searchLights = (function (options) {
      * Sets up event listeners onto the sL._nSrchLtsParent element
      * TODO: Does this need to be public?
      */
-    sL.m.fnEventsSetup = function () {
+    sL.m.fnEventsCreate = function () {
         const node = sL._nSrchLtsParent
 
         node.addEventListener('pointermove', _fnPointerFollow, false)
