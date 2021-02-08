@@ -509,11 +509,11 @@ window.searchLights = (function (options) {
     }
 
     /**
-     * Pointer  Callbacks.
+     * Public  callback methods
      */
-    sL.fnPtrMoveCallbk = function () {}
-    sL.fnPtrLeaveCallbk = function () {}
-    sL.fnPtrEnterCallbk = function () {}
+    sL.m.fnPtrMoveCallbk = function () {}
+    sL.m.fnPtrLeaveCallbk = function () {}
+    sL.m.fnPtrEnterCallbk = function () {}
 
     /**
      * Sets up event listeners onto the sL._nSrchLtsParent element
