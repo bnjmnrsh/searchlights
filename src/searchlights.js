@@ -111,7 +111,12 @@ window.searchLights = (function (options) {
      */
     const _fnSetBaseStyles = function () {
         const nBaseStyleEl = document.createElement('style')
-        nBaseStyleEl.innerHTML = `.mix-blend-mode ${sL.sTargetClass} { position: absolute; will-change: transform, opacity; }`
+        nBaseStyleEl.innerHTML = `
+.mix-blend-mode ${sL.sTargetClass} {
+    position: absolute;
+    will-change: transform, opacity;
+}`
+        nBaseStyleEl.setAttribute('srchlts', '')
         document.head.insertAdjacentElement('afterbegin', nBaseStyleEl)
     }
 
@@ -562,6 +567,9 @@ window.searchLights = (function (options) {
         delete sL.options
         delete sL.settings
         delete sL.srchLtsElsNodeList
+        // remove the style element
+        const styleEL = document.querySelector('style[srchlts]')
+        styleEL ? styleEL.remove() : ''
 
         return sL
     }
