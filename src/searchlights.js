@@ -184,6 +184,23 @@ window.searchLights = (function (options) {
     }
 
     /**
+     * Event Listener callback functions
+     * @param {event object} e
+     */
+    const _fnPointerFollow = function (e) {
+        sL.m.fnFollowPtr(e, sL._nlSrchLtsEls)
+        sL.m.fnPtrMoveCallbk(e, sL)
+    }
+    const _fnPointerEnter = function (e) {
+        sL.m.fnSrchLtElsShow(e, sL._nlSrchLtsEls)
+        sL.m.fnPtrEnterCallbk(e, sL)
+    }
+    const _fnPointerLeave = function (e) {
+        sL.m.fnSrchLtElsHide(e, sL._nlSrchLtsEls)
+        sL.m.fnPtrLeaveCallbk(e, sL)
+    }
+
+    /**
      * Create the sL.options object
      * by combining any provided user options with the _Defaults object.
      *
@@ -204,9 +221,9 @@ window.searchLights = (function (options) {
             sL._nlHasDOMels = [...nlCurrentEls]
 
             sL._nlHasDOMels.forEach(function (n, i) {
-                n.slOrgParentNode = sL._nlHasDOMels[i].parentNode
-                n.slOrgPeviousElementSibling =
-                    sL._nlHasDOMels[i].previousElementSibling
+                n.srchLtParentNode = sL._aDOMhadEls[i].parentNode
+                n.srchLtPeviousElementSibling =
+                    sL._aDOMhadEls[i].previousElementSibling
             })
         }
         // create a new settings obj by merge the incoming options with oDefaultsCopy
@@ -228,7 +245,7 @@ window.searchLights = (function (options) {
         }
 
         // Now that we have set up Defaults, grab the parent to attach to
-        sL._nSrchLtsParentNode = document.querySelector(sL.sParentEl)
+        sL._nSrchLtsParent = document.querySelector(sL.sParentEl)
     }
 
     /**
@@ -497,31 +514,28 @@ window.searchLights = (function (options) {
     sL.fnPtrEnterCallbk = function () {}
 
     /**
-     * Event Listerner functions
+     * Sets up event listeners onto the sL._nSrchLtsParent element
+     * TODO: Does this need to be public?
      */
-    const _fnPointerFollow = function (e) {
-        sL.m.fnFollowPtr(e, sL.srchLtsElsNodeList)
-        sL.fnPtrMoveCallbk(e, sL)
-    }
-    const _fnPointerEnter = function (e) {
-        sL.m.fnSrchLtElsShow(e, sL.srchLtsElsNodeList)
-        sL.fnPtrEnterCallbk(e, sL)
-    }
-    const _fnPointerLeave = function (e) {
-        sL.m.fnSrchLtElsHide(e, sL.srchLtsElsNodeList)
-        sL.fnPtrLeaveCallbk(e, sL)
+    sL.m.fnEventsSetup = function () {
+        const node = sL._nSrchLtsParent
+
+        node.addEventListener('pointermove', _fnPointerFollow, false)
+        node.addEventListener('pointerEnter', _fnPointerEnter, false)
+        node.addEventListener('pointerleave', _fnPointerLeave, false)
     }
 
     /**
      * Destroy event listeners on the sL._nSrchLtsParent element
      * TODO: Does this need to be public?
      */
-    sL.m.fnEventSetup = function () {
-        const node = sL._nSrchLtsParentNode
+    sL.m.fnEventsDestroy = function () {
+        const node = sL._nSrchLtsParent
 
-        node.addEventListener('pointermove', _fnPointerFollow, false)
-        node.addEventListener('pointerEnter', _fnPointerEnter, false)
-        node.addEventListener('pointerleave', _fnPointerLeave, false)
+        // Remove event listeners
+        node.removeEventListener('pointermove', _fnPointerFollow, false)
+        node.removeEventListener('pointerenter', _fnPointerEnter, false)
+        node.removeEventListener('pointerleave', _fnPointerLeave, false)
     }
 
     /**
@@ -551,12 +565,8 @@ window.searchLights = (function (options) {
         // Make sure we have already been initialised
         if (!sL.settings) return
 
-        const node = sL._nSrchLtsParentNode
-
         // Remove event listeners
-        node.removeEventListener('pointermove', _fnPointerFollow, false)
-        node.removeEventListener('pointerenter', _fnPointerEnter, false)
-        node.removeEventListener('pointerleave', _fnPointerLeave, false)
+        sL.m.fnEventsDestroy()
 
         // Remove elements from DOM
         sL.srchLtsElsNodeList.forEach(function (el) {
@@ -595,8 +605,8 @@ window.searchLights = (function (options) {
         // Draw each searchlight and add it to the DOM
         _fnAssembleSrchLtEls()
 
-        // Set up event listeners
-        sL.m.fnEventSetup()
+        // Create event listeners
+        sL.m.fnEventsCreate()
 
         // return updated srchLts object
         return sL
