@@ -1,10 +1,9 @@
 /**
  * searchlights.js
  *
- * @param {*} optons
- *
+ * @param {object} options
+ * @returns {object} searchLights
  */
-
 window.searchLights = (function (options) {
     ;('use strict')
 
@@ -74,10 +73,10 @@ window.searchLights = (function (options) {
     const _fnIsDOM = (el) => el instanceof Element
 
     /**
-     * Test for if provided value is a NodeList, by testing for existence of item() method.
+     * Test for if provided value is a NodeList, through existence of item().
      *
-     * @param {*} nl
-     * @returns boolean
+     * @param {nodeList} nl
+     * @returns {boolean}
      */
     const _fnIsNodeList = (nl) => {
         return nl ? typeof nl.item !== 'undefined' : false
@@ -95,7 +94,7 @@ window.searchLights = (function (options) {
      *
      * https://caniuse.com/css-mixblendmode
      *
-     * @returns boolean
+     * @returns {boolean}
      */
     const _fnSupportsBlend = function () {
         const bSupported =
@@ -108,7 +107,7 @@ window.searchLights = (function (options) {
     /**
      * Builds the base syles for searchLights and prepends them to the head
      *
-     * @returns DOM style element with content
+     * @returns {node} DOM style element with content
      */
     const _fnSetBaseStyles = function () {
         const nBaseStyleEl = document.createElement('style')
@@ -119,8 +118,8 @@ window.searchLights = (function (options) {
     /**
      * Set an element's opacity mode
      *
-     * @param {*} n
-     * @param {*} fOpacity
+     * @param {node} n
+     * @param {float} fOpacity
      */
     const _fnSetOpacity = function (n, fOpacity = sL.settings.opacity) {
         // test incoming values
@@ -131,8 +130,8 @@ window.searchLights = (function (options) {
     /**
      * Set an element's blend mode
      *
-     * @param {*} n
-     * @param {*} sBlend
+     * @param {node} n
+     * @param {string} sBlend
      */
     const _fnSetBlending = function (n, sBlend = sL.settings.blend) {
         // test incoming values
@@ -143,8 +142,8 @@ window.searchLights = (function (options) {
     /**
      * Set an element's easing (transitionTimingFunction)
      *
-     * @param {*} n
-     * @param {*} sEasing
+     * @param {node} n
+     * @param {string} sEasing
      */
     const _fnSetEasing = function (n, sEasing = sL.settings.easing) {
         // test incoming values
@@ -157,8 +156,8 @@ window.searchLights = (function (options) {
      *
      * @todo fix incoming number/string issue
      *
-     * @param {*} n
-     * @param {*} iTiming
+     * @param {node} n
+     * @param {int} iTiming
      */
     const _fnSetTiming = function (n, iTiming = sL.settings.transition) {
         // test incoming values
@@ -170,8 +169,8 @@ window.searchLights = (function (options) {
      * Set an element's z-index
      *
      *
-     * @param {*} n
-     * @param {*} iZindex
+     * @param {node} n
+     * @param {int} iZindex
      */
     const _fnSetZindex = function (n, iZindex = sL.settings.zIndex) {
         // test incoming values
@@ -183,7 +182,7 @@ window.searchLights = (function (options) {
      * Create the sL.options object
      * by combining any provided user options with the _Defaults object.
      *
-     * @param {*} oOptions
+     * @param {object} oOptions
      */
     const _fnBuildOptionsObj = function (oOptions) {
         // Allow user to overrideing many API method with custom version, and merge in options object.
@@ -267,8 +266,8 @@ window.searchLights = (function (options) {
     /**
      * Follow the pointer
      *
-     * @param {*} e
-     * @param {*} nl
+     * @param {event object} e
+     * @param {nodeList} nl
      */
     sL.m.fnFollowPtr = function (e, nl) {
         if (!_fnIsNodeList(nl)) return
@@ -285,8 +284,8 @@ window.searchLights = (function (options) {
      * It will strip empty values and remove any stray peroids(.) from user data
      * It returns the assembled string of classes.
      *
-     * @param {*} aClasses
-     * @param {*} s
+     * @param {array} aClasses
+     * @param {string} s
      *
      * @returns string of css classes
      */
@@ -306,8 +305,9 @@ window.searchLights = (function (options) {
     /**
      * A terse debouce function
      *
-     * @param {*} fn
-     * @param {*} iDelay
+     * @param {function} fn
+     * @param {int} iDelay
+     * @returns {function}
      */
     sL.m._fnDbnce = (fn, iDelay = 300) => {
         let timer
@@ -320,15 +320,13 @@ window.searchLights = (function (options) {
     }
 
     /**
-     * Create canvas elements using either options.schLightEls array,
-     * or Defaults.schLightEls if none exsits in DOM.
+     * Create canvas elements using provided array of aSrchLtElsOpts
      * Returns the resulting DOM NodeList of canvas elements.
      *
-     * @todo make the target for prepending configerable, ie
      *
-     * @param {*} [aSrchLtEls=[]]
-     * @param {*} sTargetClass
-     * @returns
+     * @param {array} [aSrchLtElsOpts]
+     * @param {string} sTargetClass
+     * @returns {nodeList}
      */
     sL.m.fnCreateSrchLtEls = function (aSrchLtEls = [], sTargetClass) {
         // Otherwise create them
@@ -369,8 +367,8 @@ window.searchLights = (function (options) {
     /**
      * Creates a 2D context from the provided canvas element
      *
-     * @param {*} canvasEl
-     * @returns context object, with element data attrs attached
+     * @param {node} canvasEl
+     * @returns {object} context object, with element data attrs attached
      */
     sL.m.fnCreateCtx = function (canvasEl) {
         // Teset for canvas DOM element
@@ -392,7 +390,8 @@ window.searchLights = (function (options) {
 
         /**
          *
-         * Here we need to merge in Defaults if not present in ctx.srchLt
+         * TODO: merge in Defaults if not present in ctx.srchLt
+         * TODO: merge in arbitrary params if present in settings
          *
          */
 
@@ -402,7 +401,7 @@ window.searchLights = (function (options) {
     /**
      * Draw elements in provided rendering context
      *
-     * @param {*} ctx
+     * @param {object} ctx
      */
     sL.m.fnDraw = function (ctx) {
         if (ctx.constructor.name !== 'CanvasRenderingContext2D') return
@@ -426,11 +425,11 @@ window.searchLights = (function (options) {
     /**
      * Show the srchLt elements
      *
-     * we can get away with using nodeList.forEach as it actyally has better support then mix-blend-mode (Edge 15)
-     * https://caniuse.com/css-mixblendmode / https://caniuse.com/?search=nodeList.forEach
+     * ? can we can get away with using nodeList.forEach it has better support then mix-blend-mode (Edge 15)
+     * ? https://caniuse.com/css-mixblendmode / https://caniuse.com/?search=nodeList.forEach
      *
-     * @param {*} e
-     * @param {*} nodeList
+     * @param {event object} e
+     * @param {nodeList} nodeList
      */
     sL.m.fnSrchLtElsShow = function (e, nodeList) {
         if (!_fnIsNodeList(nodeList)) return
@@ -446,8 +445,8 @@ window.searchLights = (function (options) {
      *
      * We can get away with using nodeList.forEach as it actually has better support then mix-blend-mode (Edge 15)
      * https://caniuse.com/css-mixblendmode / https://caniuse.com/?search=nodeList.forEach
-     *
-     * @param {*} nodeList
+     * @param {event object} e
+     * @param {nodeList} nodeList
      */
     sL.m.fnSrchLtElsHide = function (e, nodeList) {
         // if (!_fnIsNodeList(nodeList)) return
@@ -471,7 +470,7 @@ window.searchLights = (function (options) {
      * Adjusts the style property of a srchLt element so that the cursor is centered over it by default.
      * Uses translate3d in order to trigger hardware exceleration
      *
-     * @param {*} el
+     * @param {node} n
      */
     sL.m.fnCenterOnPtr = function (el) {
         if (!_fnIsDOM(el)) return
@@ -507,9 +506,8 @@ window.searchLights = (function (options) {
     }
 
     /**
-     * Sets up pointer event listeners onto the sL.settings.attach element
-     *
-     * @param {*} settings
+     * Destroy event listeners on the sL._nSrchLtsParent element
+     * TODO: Does this need to be public?
      */
     sL.m.fnEventSetup = function () {
         const node = sL._nSrchLtsParentNode
@@ -522,10 +520,8 @@ window.searchLights = (function (options) {
     /**
      * Build DOM nodes
      *
-     * @todo BUG This will rebuild, but also pulls in _Defaults.srchLtEls
-     *
-     * @param {*} [nl=sL._nlHasDOMels]
-     * @returns sL
+     * @param {nodeList} nl
+     * @returns {object} sL
      */
     sL._build = function (nl = sL._nlHasDOMels, nTarget = '') {
         // if we've been given a target use it, otherwise look for our custom property in node object
@@ -541,8 +537,7 @@ window.searchLights = (function (options) {
 
     /**
      * Public destroy method
-     * removes event listeners
-     * removes elements from DOM
+     * removes event listeners, srchLtEls
      * Clears settings & options and ptrs objects
      */
     sL._destroy = function () {
@@ -572,7 +567,7 @@ window.searchLights = (function (options) {
     /**
      * Public init method
      *
-     * @param {*} options
+     * @param {object} options
      */
     sL._init = function (oOptions) {
         // Destroy any preexsiting initialisation
