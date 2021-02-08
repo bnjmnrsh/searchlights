@@ -112,7 +112,7 @@ window.searchLights = (function (options) {
         nBaseStyleEl.innerHTML = `
 .mix-blend-mode ${sL.sTargetClass} {
     position: absolute;
-    will-change: transform, opacity;
+    will-change: transform, opacity, left, top; ;
 }`
         nBaseStyleEl.setAttribute('srchlts', '')
         document.head.insertAdjacentElement('afterbegin', nBaseStyleEl)
