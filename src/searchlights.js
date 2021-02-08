@@ -581,6 +581,9 @@ window.searchLights = (function (options) {
         delete sL.options
         delete sL.settings
         delete sL._nlSrchLtsEls
+        delete sL._nSrchLtsParent
+        // ! sL._aDOMhadEls is not destroyed so that we have the option to _build() them in future.
+
         // reset callbacks
         sL.m.fnPtrMoveCallbk = function () {}
         sL.m.fnPtrLeaveCallbk = function () {}
