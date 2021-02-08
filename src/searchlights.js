@@ -255,14 +255,15 @@ window.searchLights = (function (options) {
         if (!sL.settings.aSrchLtElsOpts) return
 
         // Create nodeList of searchLight elememts
-        sL.srchLtsElsNodeList = sL.m.fnCreateSrchLtEls(
-            sL.settings.srchLtEls,
+        sL._nlSrchLtsEls = sL.m.fnCreateSrchLtEls(
+            sL.settings.aSrchLtElsOpts,
             sL.sTargetClass
         )
 
         // draw each element
-        sL.srchLtsElsNodeList.forEach(function (el) {
-            if (!_fnIsDOM(el)) return
+        if (sL._nlSrchLtsEls) {
+            sL._nlSrchLtsEls.forEach(function (el) {
+                if (!_fnIsDOM(el)) return
 
             // create the 2d conext
             const oCtx = sL.m.fnCreateCtx(el, sL)
@@ -278,9 +279,10 @@ window.searchLights = (function (options) {
                 _fnSetTiming(el, oCtx.srchLt.timing)
             }
 
-            // do any rendering on the elements
-            sL.m.fnDraw(oCtx)
-        })
+                // do any rendering on the elements
+                sL.m.fnDraw(oCtx)
+            })
+        }
     }
 
     // searchLights Public API methods
@@ -569,14 +571,16 @@ window.searchLights = (function (options) {
         sL.m.fnEventsDestroy()
 
         // Remove elements from DOM
-        sL.srchLtsElsNodeList.forEach(function (el) {
-            el.remove()
-        })
+        if (sL._nlSrchLtsEls) {
+            sL._nlSrchLtsEls.forEach(function (el) {
+                el.remove()
+            })
+        }
 
         // Nuke run time objects: settings, nodeLists ect
         delete sL.options
         delete sL.settings
-        delete sL.srchLtsElsNodeList
+        delete sL._nlSrchLtsEls
         // reset callbacks
         sL.m.fnPtrMoveCallbk = function () {}
         sL.m.fnPtrLeaveCallbk = function () {}
