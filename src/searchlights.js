@@ -577,6 +577,11 @@ window.searchLights = (function (options) {
         delete sL.options
         delete sL.settings
         delete sL.srchLtsElsNodeList
+        // reset callbacks
+        sL.m.fnPtrMoveCallbk = function () {}
+        sL.m.fnPtrLeaveCallbk = function () {}
+        sL.m.fnPtrEnterCallbk = function () {}
+
         // remove the style element
         const styleEL = document.querySelector('style[srchlts]')
         styleEL ? styleEL.remove() : ''
