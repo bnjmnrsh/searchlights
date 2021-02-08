@@ -32,7 +32,7 @@ window.searchLights = (function (options) {
         color: undefined,
         zindex: 0,
     }
-    _Defaults.srchLtEls = [
+    _Defaults.aSrchLtElsOpts = [
         {
             classes: ['red'],
             color: 'rgb(255,0,0)',
@@ -207,18 +207,18 @@ window.searchLights = (function (options) {
         // create a new settings obj by merge the incoming options with oDefaultsCopy
         sL.settings = Object.assign({}, oDefaultsCopy, sL.options)
 
-        // If the user didn't provide options.srchLtEls, or only partial options
+        // If the user didn't provide options.aSrchLtElsOpts, or only partial options
         // then we merge any missing top level options into each el as default values.
-        if (oOptions && oOptions.options.srchLtEls !== undefined) {
-            sL.settings.srchLtEls.forEach((srchLtEl, i) => {
+        if (oOptions && oOptions.options.aSrchLtElsOpts !== undefined) {
+            sL.settings.aSrchLtElsOpts.forEach((srchLtEl, i) => {
                 srchLtEl = Object.assign(
                     srchLtEl,
-                    oOptions.options.srchLtEls[i]
+                    oOptions.options.aSrchLtElsOpts[i]
                 )
                 srchLtEl = Object.assign({}, oDefaultsCopy, srchLtEl)
-                // prevent Inception moment that creates a data-srchltels attr
-                delete srchLtEl.srchLtEls
-                sL.settings.srchLtEls[i] = srchLtEl
+                // prevent Inception moment that later creates a data-srchltels[obj] attr
+                delete srchLtEl.aSrchLtElsOpts
+                sL.settings.aSrchLtElsOpts[i] = srchLtEl
             })
         }
 
@@ -230,6 +230,8 @@ window.searchLights = (function (options) {
      * Add searchLight elements to DOM, apply inline styles, and render the Context.
      */
     const _fnAssembleSrchLtEls = function () {
+        if (!sL.settings.aSrchLtElsOpts) return
+
         // Create nodeList of searchLight elememts
         sL.srchLtsElsNodeList = sL.m.fnCreateSrchLtEls(
             sL.settings.srchLtEls,
