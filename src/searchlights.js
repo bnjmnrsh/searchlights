@@ -189,15 +189,15 @@ window.searchLights = (function (options) {
      */
     const _fnPointerFollow = function (e) {
         sL.m.fnFollowPtr(e, sL._nlSrchLtsEls)
-        sL.m.fnPtrMoveCallbk(e, sL)
+        sL.fnPtrMoveCallbk(e, sL)
     }
     const _fnPointerEnter = function (e) {
         sL.m.fnSrchLtElsShow(e, sL._nlSrchLtsEls)
-        sL.m.fnPtrEnterCallbk(e, sL)
+        sL.fnPtrEnterCallbk(e, sL)
     }
     const _fnPointerLeave = function (e) {
         sL.m.fnSrchLtElsHide(e, sL._nlSrchLtsEls)
-        sL.m.fnPtrLeaveCallbk(e, sL)
+        sL.fnPtrLeaveCallbk(e, sL)
     }
 
     /**
@@ -511,9 +511,9 @@ window.searchLights = (function (options) {
     /**
      * Public  callback methods
      */
-    sL.m.fnPtrMoveCallbk = function () {}
-    sL.m.fnPtrLeaveCallbk = function () {}
-    sL.m.fnPtrEnterCallbk = function () {}
+    sL.fnPtrMoveCallbk = function () {}
+    sL.fnPtrLeaveCallbk = function () {}
+    sL.fnPtrEnterCallbk = function () {}
 
     /**
      * Sets up event listeners onto the sL._nSrchLtsParent element
@@ -585,9 +585,9 @@ window.searchLights = (function (options) {
         // ! sL._aDOMhadEls is not destroyed so that we have the option to _build() them in future.
 
         // reset callbacks
-        sL.m.fnPtrMoveCallbk = function () {}
-        sL.m.fnPtrLeaveCallbk = function () {}
-        sL.m.fnPtrEnterCallbk = function () {}
+        sL.fnPtrMoveCallbk = function () {}
+        sL.fnPtrLeaveCallbk = function () {}
+        sL.fnPtrEnterCallbk = function () {}
 
         // remove the style element
         const styleEL = document.querySelector('style[srchlts]')
