@@ -67,10 +67,10 @@ window.searchLights = (function (options) {
     /**
      * Test if provided element is a DOM node
      *
-     * @param {DOM node} n
+     * @param {DOM element} el
      * @returns {boolean}
      */
-    const _fnIsDOM = (n) => n instanceof Element
+    const _fnIsDOM = (el) => el instanceof Element
 
     /**
      * Test for if provided value is a NodeList, through existence of item().
