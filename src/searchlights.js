@@ -418,13 +418,14 @@ window.searchLights = (function (options) {
 
     /**
      * Creates a 2D context from the provided canvas element
+     * sanitise dataset values used in drawing
      *
      * @param {node} canvasEl
      * @returns {object} context object, with element data attrs attached
      */
     sL.m.fnCreateCtx = function (canvasEl) {
-        // Teset for canvas DOM element
-        if (canvasEl.tagName !== 'CANVAS') return
+        // If its not a canvas el, return the element
+        if (canvasEl.tagName !== 'CANVAS') return canvasEl
 
         const dia = Math.abs(parseInt(canvasEl.dataset.dia || sL.settings.dia))
         const blur = Math.abs(
