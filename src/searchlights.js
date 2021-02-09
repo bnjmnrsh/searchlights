@@ -561,20 +561,30 @@ window.searchLights = (function (options) {
     }
 
     /**
-     * Build DOM nodes
+     * Build DOM elements
+     * Takes an array of elements and adds them to the DOM.
+     * Defaults to any previliously captured srcLt els
+     * if a target node is provided it will append to it,
+     * otherwise it will look for our custom node attribute srchLtParentNode
      *
-     * @param {nodeList} nl
-     * @returns {object} sL
+     * @param {arrat} [els=sL._aDOMhadEls]
+     * @param {string} [nTarget='']
+     * @returns
      */
-    sL._build = function (nl = sL._nlHasDOMels, nTarget = '') {
-        // if we've been given a target use it, otherwise look for our custom property in node object
-        nl.forEach(function (n, i) {
-            if (_fnIsDOM(nTarget)) {
-                nl[i].nTarget.appendChild(n)
-            } else if (_fnIsDOM(nl[i].slOrgParentNode)) {
-                nl[i].slOrgParentNode.appendChild(n)
-            }
-        })
+    sL._build = function (els = sL._aDOMhadEls, nTarget = '') {
+        if (els && els.length) {
+            // if we've been given a target use it, otherwise look for our custom property in node object
+            els.forEach(function (el, i) {
+                // have we been provided a target node?
+                if (_fnIsDOM(nTarget)) {
+                    els[i].nTarget.appendChild(el)
+
+                    // otherwise, do we have a custom srchLtParentNode?
+                } else if (_fnIsDOM(els[i].srchLtParentNode)) {
+                    els[i].srchLtParentNode.appendChild(el)
+                }
+            })
+        }
         return sL
     }
 
