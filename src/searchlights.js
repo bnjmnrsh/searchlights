@@ -56,9 +56,9 @@ window.searchLights = (function (options) {
     sL.sParentEl = 'body'
     // Default seachLight element class
     sL.sTargetClass = '.searchlight'
-    //flag will prevent most inline styles on serchLight elements
+    // Prevent most inline styles on serchLight elements
     sL.bUseInlineStyles = true
-    //flag will enables the hiding of searchLight elements when the pointer exits the parent El
+    // Enables the hiding of searchLight elements when the pointer exits the parent El
     sL.bEnableShowHide = true
 
     // ! PRIVATE
@@ -207,11 +207,9 @@ window.searchLights = (function (options) {
      * Create the sL.options object
      * by combining any provided user options with the _Defaults object.
      *
-     * TODO: Rename to _fnBuildSettingsObj
-     *
      * @param {object} oOptions
      */
-    const _fnBuildOptionsObj = function (oOptions) {
+    const _fnBuildSettingsObj = function (oOptions) {
         // copy the _Defaults obj so we dont accidently mutate it
         let oDefaultsCopy = { ..._Defaults }
 
@@ -399,6 +397,7 @@ window.searchLights = (function (options) {
                 delete aCopySrchLtEls.classes
 
                 // turn any prtEl options into data attributes
+                // used for showHide and other flags
                 for (const property in aCopySrchLtEls) {
                     if (aCopySrchLtEls[property]) {
                         nCanvas.setAttribute(
@@ -641,7 +640,7 @@ window.searchLights = (function (options) {
         if (sL.bUseInlineStyles) _fnSetBaseStyles()
 
         // Merge Defaults and user options into new sL.settings object
-        _fnBuildOptionsObj(oOptions)
+        _fnBuildSettingsObj(oOptions)
 
         // Draw each searchlight and add it to the DOM
         _fnAssembleSrchLtEls()
