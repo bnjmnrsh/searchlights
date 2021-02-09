@@ -300,6 +300,7 @@ window.searchLights = (function (options) {
                     _fnSetOpacity(el, oCtx.srchLt.opacity)
                     _fnSetEasing(el, oCtx.srchLt.easing)
                     _fnSetTiming(el, oCtx.srchLt.timing)
+                    _fnSetZindex(el, oCtx.srchLt.zindex)
                 }
 
                 // do any rendering on the elements
