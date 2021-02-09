@@ -378,37 +378,39 @@ window.searchLights = (function (options) {
      * @param {string} sTargetClass
      * @returns {nodeList}
      */
-    sL.m.fnCreateSrchLtEls = function (aSrchLtEls = [], sTargetClass) {
-        // Otherwise create them
-        aSrchLtEls.forEach(function (aSrchLtEls) {
-            const nCanvas = document.createElement('canvas')
-            // Add classes
-            nCanvas.className = sL.m.fnStringifyClassArray(
-                aSrchLtEls.classes,
-                sTargetClass
-            )
+    sL.m.fnCreateSrchLtEls = function (
+        aSrchLtElsOpts = [],
+        sTargetClass = sL.sTargetClass
+    ) {
+        if (aSrchLtElsOpts.length) {
+            // Otherwise create them
+            aSrchLtElsOpts.forEach(function (aSrchLtElsOpts) {
+                const nCanvas = document.createElement('canvas')
+                // Add classes
+                nCanvas.className = sL.m.fnStringifyClassArray(
+                    aSrchLtElsOpts.classes,
+                    sTargetClass
+                )
 
-            // copy the current aSrchLtEls into a new object
-            const aCopySrchLtEls = { ...aSrchLtEls }
+                // copy the current aSrchLtElsOpts into a new object
+                const aCopySrchLtEls = { ...aSrchLtElsOpts }
 
-            // remove the classes array
-            delete aCopySrchLtEls.classes
+                // remove the classes array
+                delete aCopySrchLtEls.classes
 
-            // turn any prtEl options into data attributes
-            for (const property in aCopySrchLtEls) {
-                if (aCopySrchLtEls[property]) {
-                    nCanvas.setAttribute(
-                        `data-${property}`,
-                        `${aCopySrchLtEls[property]}`
-                    )
+                // turn any prtEl options into data attributes
+                for (const property in aCopySrchLtEls) {
+                    if (aCopySrchLtEls[property]) {
+                        nCanvas.setAttribute(
+                            `data-${property}`,
+                            `${aCopySrchLtEls[property]}`
+                        )
+                    }
                 }
-            }
-            // Attach it to the DOM
-
-            sL._nSrchLtsParentNode
-                ? sL._nSrchLtsParentNode.prepend(nCanvas)
-                : ''
-        })
+                // Attach it to the DOM
+                sL._nSrchLtsParent ? sL._nSrchLtsParent.prepend(nCanvas) : ''
+            })
+        }
         // refresh the nodeList of searchlight elements now in the DOM
         const nlAllSrcLtsEls = document.querySelectorAll(sTargetClass)
         return nlAllSrcLtsEls ? nlAllSrcLtsEls : -1
