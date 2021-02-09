@@ -7,21 +7,6 @@
 window.searchLights = (function (options) {
     ;('use strict')
 
-    // The public searchLights object
-    let sL = {}
-
-    // Default parent to attach searchLight elements to
-    sL.sParentEl = 'body'
-    // Default seachLight element class
-    sL.sTargetClass = '.searchlight'
-    //flag will prevent most inline styles on serchLight elements
-    sL.bUseInlineStyles = true
-    //flag will enables the hiding of searchLight elements when the pointer exits the parent El
-    sL.bEnableShowHide = true
-
-    // Will hold previously captured DOM elements if they exsist
-    sL._aDOMhadEls = []
-
     // Default element values
     const _Defaults = {
         blur: 3,
@@ -65,8 +50,26 @@ window.searchLights = (function (options) {
         },
     ]
 
-    // Helper methods
+    // * The public searchLights object
+    let sL = {}
+    // Default parent to attach searchLight elements to
+    sL.sParentEl = 'body'
+    // Default seachLight element class
+    sL.sTargetClass = '.searchlight'
+    //flag will prevent most inline styles on serchLight elements
+    sL.bUseInlineStyles = true
+    //flag will enables the hiding of searchLight elements when the pointer exits the parent El
+    sL.bEnableShowHide = true
 
+    // ! PRIVATE
+    // An array of captured srchLt DOM elements if they exsist on first load
+    sL._aDOMhadEls = []
+    //  A nodeList of current srchLt elemtnts
+    sL._nlSrchLtsEls
+    // The parent node where srchLts are appended
+    sL._nSrchLtsParent
+
+    // * Internal Helper methods
     /**
      * Test if provided element is a DOM node
      *
@@ -228,10 +231,7 @@ window.searchLights = (function (options) {
             // if we've had DOM els, and we're not reciving any oOptions.aSrchLtElsOpts
             delete oDefaultsCopy.aSrchLtElsOpts
         } else {
-            // If we don't have any previous elements
-            // if (sL._aDOMhadEls === undefined || sL._aDOMhadEls.length === 0) {
-
-            // if we found some
+            // TODO !  if we found some, cleanup this duplication
             if (nlCurrentEls.length) {
                 // Remove the template _Defaults.serchLtEls so they are not added
                 delete oDefaultsCopy.aSrchLtElsOpts
@@ -441,18 +441,13 @@ window.searchLights = (function (options) {
         // Add all canvasEl data attrs to ctx object for future use
         ctx.srchLt = { ...canvasEl.dataset }
 
-        /**
-         *
-         * TODO: merge in Defaults if not present in ctx.srchLt
-         * TODO: merge in arbitrary params if present in settings
-         *
-         */
-
         return ctx
     }
 
     /**
      * Draw elements in provided rendering context
+     * You could also use values from ctx.canvas.dataset.x,
+     * but we have them in ctx.srchLt.x, with dia and blur sanitised
      *
      * @param {object} ctx
      */
@@ -616,7 +611,7 @@ window.searchLights = (function (options) {
         delete sL.settings
         delete sL._nlSrchLtsEls
         delete sL._nSrchLtsParent
-        // ! sL._aDOMhadEls is not destroyed so that we have the option to _build() them in future.
+        // * sL._aDOMhadEls is not destroyed so that we have the option to _build() them in future.
 
         // reset callbacks
         sL.fnPtrMoveCallbk = function () {}
