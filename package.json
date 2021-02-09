@@ -5,7 +5,8 @@
     "main": "searchlights.js",
     "scripts": {
         "start": "parcel serve ./src/index.html",
-        "build": "parcel build ./src/index.html"
+        "build": "parcel build ./src/index.html",
+        "test-it": "test-it"
     },
     "browserslist": "> 0.2%",
     "repository": {
@@ -23,6 +24,8 @@
     },
     "homepage": "https://github.com/bnjmnrsh/searchlights.js#readme",
     "devDependencies": {
+        "@test-it/cli": "^0.6.6",
+        "@test-it/core": "^0.6.6",
         "eslint": "^7.18.0",
         "eslint-config-prettier": "^7.2.0",
         "eslint-config-standard": "^16.0.2",
@@ -32,6 +35,5 @@
         "parcel": "^2.0.0-nightly.540",
         "prettier": "^2.2.1",
         "sass": "^1.32.4"
-    },
-    "dependencies": {}
+    }
 }
