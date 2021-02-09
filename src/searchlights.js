@@ -340,16 +340,16 @@ window.searchLights = (function (options) {
      * @returns string of css classes
      */
     sL.m.fnStringifyClassArray = function (aClasses = [], s = '') {
-        // merge array with provided target class as string
-        aClasses.push(s)
-
-        // Remove empty array elememts
-        aClasses = aClasses.filter(Boolean)
-
-        // Make it a string, removing any full stops
-        const sClasses = [...new Set(aClasses)].join(' ').replace(/[.]/g, '')
-
-        return sClasses
+        // Leave the origional array alone
+        let aClassesCopy = [...aClasses]
+        // merge with provided string
+        aClassesCopy.push(s)
+        // Remove fasey elememts
+        aClassesCopy.filter(Boolean)
+        // Remove duplicates
+        aClassesCopy = [...new Set(aClassesCopy)]
+        // Return string, removing full stops and extra spaces
+        return aClassesCopy.join(' ').replace(/\s\s+/g, ' ').replace(/[.]/g, '')
     }
 
     /**
