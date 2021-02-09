@@ -19,6 +19,9 @@ window.searchLights = (function (options) {
     //flag will enables the hiding of searchLight elements when the pointer exits the parent El
     sL.bEnableShowHide = true
 
+    // Will hold previously captured DOM elements if they exsist
+    sL._aDOMhadEls = []
+
     // Default element values
     const _Defaults = {
         blur: 3,
@@ -206,40 +209,46 @@ window.searchLights = (function (options) {
      * @param {object} oOptions
      */
     const _fnBuildOptionsObj = function (oOptions) {
-        // Allow user to overrideing many API method with custom version, and merge in options object.
-        sL = Object.assign(sL, oOptions)
-
-        // copy the _Defaults obj
+        // copy the _Defaults obj so we dont accidently mutate it
         let oDefaultsCopy = { ..._Defaults }
 
-        // if we previously found searchLight DOM elements
-        if (sL._aDOMhadEls && sL._aDOMhadEls.length) {
-            delete oDefaultsCopy.aSrchLtElsOpts
-        }
-        // If we don't have an previous elements
-        if (sL._aDOMhadEls === undefined) {
-            // do we have some now?
-            const nlCurrentEls = document.querySelectorAll(sL.sTargetClass)
+        // Allow user to override any API method by including tehm with their options object.
+        sL = Object.assign(sL, oOptions)
 
-            console.log(nlCurrentEls)
-            // if we found some, or if there are also options.aSrchLtElsOpts
-            if (
-                nlCurrentEls.length ||
-                (oOptions && 'aSrchLtElsOpts' in oOptions)
-            ) {
+        // do we have any current elements?
+        const nlCurrentEls = document.querySelectorAll(sL.sTargetClass)
+
+        if (
+            nlCurrentEls.length === 0 &&
+            sL._aDOMhadEls.length &&
+            oOptions &&
+            oOptions.aSrchLtElsOpts === 'undefined'
+        ) {
+            // delete the _Default.aSrchLtElsOpts
+            // if we've had DOM els, and we're not reciving any oOptions.aSrchLtElsOpts
+            delete oDefaultsCopy.aSrchLtElsOpts
+        } else {
+            // If we don't have any previous elements
+            // if (sL._aDOMhadEls === undefined || sL._aDOMhadEls.length === 0) {
+
+            // if we found some
+            if (nlCurrentEls.length) {
                 // Remove the template _Defaults.serchLtEls so they are not added
                 delete oDefaultsCopy.aSrchLtElsOpts
             }
 
-            // Turn the node list into an array
-            sL._aDOMhadEls = [...nlCurrentEls]
-
-            // Add our custom parentNode prop to each as parentNode is deleted by browser on removal from DOM
-            sL._aDOMhadEls.forEach(function (n, i) {
-                n.srchLtParentNode = sL._aDOMhadEls[i].parentNode
-                n.srchLtPeviousElementSibling =
-                    sL._aDOMhadEls[i].previousElementSibling
-            })
+            if (!sL._aDOMhadEls.length) {
+                // We've not been here before
+                // Turn the node list into an array
+                sL._aDOMhadEls = [...nlCurrentEls]
+                // Add our custom parentNode prop to each el,
+                // as el.parentNode is lost after removal from DOM
+                sL._aDOMhadEls.forEach(function (n, i) {
+                    n.srchLtParentNode = sL._aDOMhadEls[i].parentNode
+                    n.srchLtPeviousElementSibling =
+                        sL._aDOMhadEls[i].previousElementSibling
+                })
+            }
         }
         // create a new settings obj by merge the incoming options with oDefaultsCopy
         sL.settings = Object.assign({}, oDefaultsCopy, sL.options)
