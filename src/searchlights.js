@@ -385,7 +385,7 @@ window.searchLights = (function (options) {
         sTargetClass = sL.sTargetClass
     ) {
         if (aSrchLtElsOpts.length) {
-            // Otherwise create them
+            // We have element options, so create them
             aSrchLtElsOpts.forEach(function (aSrchLtElsOpts) {
                 const nCanvas = document.createElement('canvas')
                 // Add classes
