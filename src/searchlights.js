@@ -656,3 +656,5 @@ window.searchLights = (function (options) {
     // return public API
     return sL
 })()
+
+module.exports = window.searchLights
