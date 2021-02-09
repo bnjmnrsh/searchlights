@@ -218,11 +218,11 @@ window.searchLights = (function (options) {
         // Allow user to override any API method by including tehm with their options object.
         sL = Object.assign(sL, oOptions)
 
-        // do we have any current elements?
+        // do we have any current elements in the DOM?
         const nlCurrentEls = document.querySelectorAll(sL.sTargetClass)
 
+        // TODO cleanup
         if (
-            nlCurrentEls.length === 0 &&
             sL._aDOMhadEls.length &&
             oOptions &&
             oOptions.aSrchLtElsOpts === 'undefined'
@@ -231,9 +231,11 @@ window.searchLights = (function (options) {
             // if we've had DOM els, and we're not reciving any oOptions.aSrchLtElsOpts
             delete oDefaultsCopy.aSrchLtElsOpts
         } else {
-            // TODO !  if we found some, cleanup this duplication
+            // TODO cleanup
+            // if we found some previously
             if (nlCurrentEls.length) {
-                // Remove the template _Defaults.serchLtEls so they are not added
+                // delete the _Default.aSrchLtElsOpts
+                // if we have some in the DOM already
                 delete oDefaultsCopy.aSrchLtElsOpts
             }
 
@@ -497,7 +499,7 @@ window.searchLights = (function (options) {
      * @param {nodeList} nodeList
      */
     sL.m.fnSrchLtElsHide = function (e, nodeList) {
-        // if (!_fnIsNodeList(nodeList)) return
+        if (!nodeList) return
         nodeList.forEach(function (el) {
             if (sL.bEnableShowHide) {
                 // dial down the opacity
