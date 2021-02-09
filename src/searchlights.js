@@ -163,7 +163,6 @@ window.searchLights = (function (options) {
      * @param {int} iTiming
      */
     const _fnSetTiming = function (n, iTiming = sL.settings.transition) {
-        // test incoming values
         // if (!_fnIsDOM(n) || typeof iTiming !== 'number') return
         n.style.transitionDuration = iTiming + 'ms'
     }
@@ -201,6 +200,8 @@ window.searchLights = (function (options) {
     /**
      * Create the sL.options object
      * by combining any provided user options with the _Defaults object.
+     *
+     * TODO: Rename to _fnBuildSettingsObj
      *
      * @param {object} oOptions
      */
@@ -257,25 +258,24 @@ window.searchLights = (function (options) {
             sL.settings.aSrchLtElsOpts,
             sL.sTargetClass
         )
-
-        // draw each element
         if (sL._nlSrchLtsEls) {
+            // draw each element
             sL._nlSrchLtsEls.forEach(function (el) {
                 if (!_fnIsDOM(el)) return
 
-            // create the 2d conext
-            const oCtx = sL.m.fnCreateCtx(el, sL)
+                // create the 2d conext
+                const oCtx = sL.m.fnCreateCtx(el, sL)
 
-            // Set each element's specific styles
-            sL.m.fnCenterOnPtr(el)
+                // Set each element's specific styles
+                sL.m.fnCenterOnPtr(el)
 
-            // if bUseInlineStyles is true assign the styles to each element
-            if (sL.bUseInlineStyles) {
-                _fnSetBlending(el, oCtx.srchLt.blend)
-                _fnSetOpacity(el, oCtx.srchLt.opacity)
-                _fnSetEasing(el, oCtx.srchLt.easing)
-                _fnSetTiming(el, oCtx.srchLt.timing)
-            }
+                // if bUseInlineStyles is true assign the styles to each element
+                if (sL.bUseInlineStyles) {
+                    _fnSetBlending(el, oCtx.srchLt.blend)
+                    _fnSetOpacity(el, oCtx.srchLt.opacity)
+                    _fnSetEasing(el, oCtx.srchLt.easing)
+                    _fnSetTiming(el, oCtx.srchLt.timing)
+                }
 
                 // do any rendering on the elements
                 sL.m.fnDraw(oCtx)
@@ -496,14 +496,10 @@ window.searchLights = (function (options) {
      *
      * @param {node} n
      */
-    sL.m.fnCenterOnPtr = function (el) {
-        if (!_fnIsDOM(el)) return
-        el.style.transform =
-            'translate3d(  ' +
-            -el.width / 2 +
-            'px, ' +
-            -el.height / 2 +
-            'px, 0)'
+    sL.m.fnCenterOnPtr = function (n) {
+        if (!_fnIsDOM(n)) return
+        n.style.transform =
+            'translate3d(  ' + -n.width / 2 + 'px, ' + -n.height / 2 + 'px, 0)'
     }
 
     /**
@@ -568,7 +564,8 @@ window.searchLights = (function (options) {
         // Remove event listeners
         sL.m.fnEventsDestroy()
 
-        // Remove elements from DOM
+        // Remove elements we built from Options and added to DOM
+        // Not ALL srchLt elements that may have been on the DOM initially
         if (sL._nlSrchLtsEls) {
             sL._nlSrchLtsEls.forEach(function (el) {
                 el.remove()
@@ -606,11 +603,11 @@ window.searchLights = (function (options) {
         // Bail if browser dosen't support blending modes (see notes on safari)
         if (!_fnSupportsBlend()) return
 
-        // Merge Defaults and user options into new sL.settings object
-        _fnBuildOptionsObj(oOptions)
-
         // Add the base styles to head if bUseInlineStyles
         if (sL.bUseInlineStyles) _fnSetBaseStyles()
+
+        // Merge Defaults and user options into new sL.settings object
+        _fnBuildOptionsObj(oOptions)
 
         // Draw each searchlight and add it to the DOM
         _fnAssembleSrchLtEls()
@@ -622,6 +619,6 @@ window.searchLights = (function (options) {
         return sL
     }
 
-    // srcLts as public API
+    // return public API
     return sL
 })()
