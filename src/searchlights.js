@@ -34,7 +34,7 @@ window.searchLights = (function (options) {
     }
     _Defaults.aSrchLtElsOpts = [
         {
-            classes: ['red'],
+            classes: ['red', 'srchLts-def'],
             color: 'rgb(255,0,0)',
             dia: _Defaults.dia,
             blur: _Defaults.blur,
@@ -43,7 +43,7 @@ window.searchLights = (function (options) {
             timing: 400,
         },
         {
-            classes: ['green'],
+            classes: ['green', 'srchLts-def'],
             color: 'rgb(0,255,0)',
             dia: _Defaults.dia,
             blur: _Defaults.blur,
@@ -52,7 +52,7 @@ window.searchLights = (function (options) {
             timing: 425,
         },
         {
-            classes: ['blue'],
+            classes: ['blue', 'srchLts-def'],
             color: 'rgb(0,0,255)',
             dia: _Defaults.dia,
             blur: _Defaults.blur,
