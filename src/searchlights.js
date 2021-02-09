@@ -278,13 +278,11 @@ window.searchLights = (function (options) {
      * Add searchLight elements to DOM, apply inline styles, and render the Context.
      */
     const _fnAssembleSrchLtEls = function () {
-        if (!sL.settings.aSrchLtElsOpts) return
-
-        // Create nodeList of searchLight elememts
         sL._nlSrchLtsEls = sL.m.fnCreateSrchLtEls(
             sL.settings.aSrchLtElsOpts,
             sL.sTargetClass
         )
+
         if (sL._nlSrchLtsEls) {
             // draw each element
             sL._nlSrchLtsEls.forEach(function (el) {
