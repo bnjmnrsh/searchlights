@@ -212,14 +212,30 @@ window.searchLights = (function (options) {
         // copy the _Defaults obj
         let oDefaultsCopy = { ..._Defaults }
 
-        if (!sL._nlHasDOMels || (oOptions && 'srchLtEls' in oOptions)) {
-            // Remove the template serchLtEls so they are not added
-            delete oDefaultsCopy.srchLtEls
-
+        // if we previously found searchLight DOM elements
+        if (sL._aDOMhadEls && sL._aDOMhadEls.length) {
+            delete oDefaultsCopy.aSrchLtElsOpts
+        }
+        // If we don't have an previous elements
+        if (sL._aDOMhadEls === undefined) {
+            // do we have some now?
             const nlCurrentEls = document.querySelectorAll(sL.sTargetClass)
-            sL._nlHasDOMels = [...nlCurrentEls]
 
-            sL._nlHasDOMels.forEach(function (n, i) {
+            console.log(nlCurrentEls)
+            // if we found some, or if there are also options.aSrchLtElsOpts
+            if (
+                nlCurrentEls.length ||
+                (oOptions && 'aSrchLtElsOpts' in oOptions)
+            ) {
+                // Remove the template _Defaults.serchLtEls so they are not added
+                delete oDefaultsCopy.aSrchLtElsOpts
+            }
+
+            // Turn the node list into an array
+            sL._aDOMhadEls = [...nlCurrentEls]
+
+            // Add our custom parentNode prop to each as parentNode is deleted by browser on removal from DOM
+            sL._aDOMhadEls.forEach(function (n, i) {
                 n.srchLtParentNode = sL._aDOMhadEls[i].parentNode
                 n.srchLtPeviousElementSibling =
                     sL._aDOMhadEls[i].previousElementSibling
