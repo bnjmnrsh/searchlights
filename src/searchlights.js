@@ -396,7 +396,7 @@ window.searchLights = (function (options) {
                 // remove the classes array
                 delete aCopySrchLtEls.classes
 
-                // turn any prtEl options into data attributes
+                // turn any incoming settings.aSrchLtElsOpt into data attributes
                 // used for showHide and other flags
                 for (const property in aCopySrchLtEls) {
                     if (aCopySrchLtEls[property]) {
@@ -437,8 +437,11 @@ window.searchLights = (function (options) {
 
         const ctx = canvasEl.getContext('2d')
 
-        // Add all canvasEl data attrs to ctx object for future use
-        ctx.srchLt = { ...canvasEl.dataset }
+        // copy the current aSrchLtElsOpts into a new object
+        let oSlsettingsCopy = 'settings' in sL ? { ...sL.settings } : {}
+
+        // Merge the data attrs with settings into ctx object for future use
+        ctx.srchLt = { ...oSlsettingsCopy, ...canvasEl.dataset }
 
         return ctx
     }
@@ -447,6 +450,7 @@ window.searchLights = (function (options) {
      * Draw elements in provided rendering context
      * You could also use values from ctx.canvas.dataset.x,
      * but we have them in ctx.srchLt.x, with dia and blur sanitised
+     * as well as all top level options, if they were missing in the origional element
      *
      * @param {object} ctx
      */
