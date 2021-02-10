@@ -120,7 +120,9 @@ window.searchLights = (function (options) {
         nBaseStyleEl.innerHTML = `
 .mix-blend-mode ${sL.sTargetClass} {
     position: absolute;
-    will-change: transform, opacity, left, top; ;
+    will-change: transform, opacity, left, top;
+    opacity: 0;
+    display: none;
 }`
         nBaseStyleEl.setAttribute('srchlts', '')
         document.head.insertAdjacentElement('afterbegin', nBaseStyleEl)
@@ -608,6 +610,8 @@ window.searchLights = (function (options) {
         // Not ALL srchLt elements that may have been on the DOM initially
         if (sL._nlSrchLtsEls) {
             sL._nlSrchLtsEls.forEach(function (el) {
+                el.style.opacity = '0'
+                el.style.visibility = 'hidden'
                 el.remove()
             })
         }
