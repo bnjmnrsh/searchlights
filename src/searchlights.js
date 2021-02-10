@@ -69,7 +69,7 @@ window.searchLights = (function (options) {
     // The parent node where srchLts are appended
     sL._nSrchLtsParent
 
-    // * Internal Helper methods
+    // * Internal helper methods
     /**
      * Test if provided element is a DOM node
      *
@@ -110,6 +110,8 @@ window.searchLights = (function (options) {
 
     /**
      * Builds the base syles for searchLights and prepends them to the head
+     * Use of display none helps prevent FOUS
+     * We use opacity 0, so that opacity transitions rather then just 'appearing' on the screen.
      *
      * @returns {node} DOM style element with content
      */
