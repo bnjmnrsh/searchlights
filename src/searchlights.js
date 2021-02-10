@@ -450,7 +450,8 @@ window.searchLights = (function (options) {
      * Draw elements in provided rendering context
      * You could also use values from ctx.canvas.dataset.x,
      * but we have them in ctx.srchLt.x, with dia and blur sanitised
-     * as well as all top level options, if they were missing in the origional element
+     * as well as all top level sL.settings, if they were missing off the origional element.
+     * Any custom data-attrs are included as well.
      *
      * @param {object} ctx
      */
