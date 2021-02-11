@@ -514,9 +514,9 @@ window.searchLights = (function (options) {
                 // Grab timing value of current element
                 const timing = el.dataset.timing || sL.settings.timing
 
-                // remove it from the DOM after transistion
+                // hide DOM after transistion completed
                 sL.m._fnDbnce(function () {
-                    el.style.display = 'none'
+                    el.setAttribute('hidden', '')
                 }, timing)()
             }
         })
@@ -571,7 +571,10 @@ window.searchLights = (function (options) {
      * Takes an array of elements and adds them to the DOM.
      * Defaults to any previliously captured srcLt els
      * if a target node is provided it will append to it,
-     * otherwise it will look for our custom node attribute srchLtParentNode
+     * otherwise it will look for our custom node attribute el.srchLtParentNode
+     *
+     * TODO: There is a performace hit here, as we are adding each element to the DOM in a forEach
+     * * document.createDocumentFragment() would be a better approach if we could garuentee that each element had the same target
      *
      * @param {arrat} [els=sL._aDOMhadEls]
      * @param {string} [nTarget='']
