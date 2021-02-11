@@ -121,8 +121,6 @@ window.searchLights = (function (options) {
 .mix-blend-mode ${sL.sTargetClass} {
     position: absolute;
     will-change: transform, opacity, left, top;
-    opacity: 0;
-    display: none;
 }`
         nBaseStyleEl.setAttribute('srchlts', '')
         document.head.insertAdjacentElement('afterbegin', nBaseStyleEl)
@@ -199,11 +197,11 @@ window.searchLights = (function (options) {
         sL.fnPtrMoveCallbk(e, sL)
     }
     const _fnPointerEnter = function (e) {
-        sL.m.fnSrchLtElsShow(e, sL._nlSrchLtsEls)
+        sL.m.fnSrchLtElsShow(sL._nlSrchLtsEls, e, sL)
         sL.fnPtrEnterCallbk(e, sL)
     }
     const _fnPointerLeave = function (e) {
-        sL.m.fnSrchLtElsHide(e, sL._nlSrchLtsEls)
+        sL.m.fnSrchLtElsHide(sL._nlSrchLtsEls, e, sL)
         sL.fnPtrLeaveCallbk(e, sL)
     }
 
@@ -327,8 +325,8 @@ window.searchLights = (function (options) {
         nl.forEach(function (el) {
             el.style.left = e.pageX + 'px'
             el.style.top = e.pageY + 'px'
-            sL.m.fnSrchLtElsShow(el, nl)
         })
+        sL.m.fnSrchLtElsShow(nl, e, sL)
     }
 
     /**
@@ -438,6 +436,7 @@ window.searchLights = (function (options) {
         // Set height and width of canvas element
         canvasEl.width = dia + blur * 2
         canvasEl.height = dia + blur * 2
+        canvasEl.setAttribute('hidden', '')
 
         const ctx = canvasEl.getContext('2d')
 
@@ -481,30 +480,31 @@ window.searchLights = (function (options) {
     /**
      * Show the srchLt elements
      *
-     * ? can we can get away with using nodeList.forEach it has better support then mix-blend-mode (Edge 15)
-     * ? https://caniuse.com/css-mixblendmode / https://caniuse.com/?search=nodeList.forEach
      *
      * @param {event object} e
      * @param {nodeList} nodeList
+     * @param {object} searchLight object
      */
-    sL.m.fnSrchLtElsShow = function (e, nodeList) {
+    sL.m.fnSrchLtElsShow = function (nodeList, e, sL = {}) {
         if (!_fnIsNodeList(nodeList)) return
-
         nodeList.forEach(function (el) {
-            el.style.display = 'initial'
-            el.style.opacity = el.dataset.opacity || sL.settings.opacity
+            el.removeAttribute('hidden')
+            const timing = el.dataset.timing || sL.settings.timing
+            sL.m._fnDbnce(function () {
+                el.style.opacity = el.dataset.opacity || sL.settings.opacity
+            }, timing)()
         })
     }
 
     /**
-     * Hide the srchLt elements with opacity and display:none incase they interfer with pointer interactions
+     * Hide the srchLt elements with a nice opacity decay based on the element's timing.
      *
-     * We can get away with using nodeList.forEach as it actually has better support then mix-blend-mode (Edge 15)
-     * https://caniuse.com/css-mixblendmode / https://caniuse.com/?search=nodeList.forEach
+     *
      * @param {event object} e
      * @param {nodeList} nodeList
+     * @param {object} searchLight object
      */
-    sL.m.fnSrchLtElsHide = function (e, nodeList) {
+    sL.m.fnSrchLtElsHide = function (nodeList, e, sl = {}) {
         if (!nodeList) return
         nodeList.forEach(function (el) {
             if (sL.bEnableShowHide) {
@@ -580,7 +580,11 @@ window.searchLights = (function (options) {
     sL._build = function (els = sL._aDOMhadEls, nTarget = '') {
         if (els && els.length) {
             // if we've been given a target use it, otherwise look for our custom property in node object
+
             els.forEach(function (el, i) {
+                // hide it on first placement
+                el.setAttribute('hidden', '')
+
                 // have we been provided a target node?
                 if (_fnIsDOM(nTarget)) {
                     els[i].nTarget.appendChild(el)
@@ -610,8 +614,7 @@ window.searchLights = (function (options) {
         // Not ALL srchLt elements that may have been on the DOM initially
         if (sL._nlSrchLtsEls) {
             sL._nlSrchLtsEls.forEach(function (el) {
-                el.style.opacity = '0'
-                el.style.visibility = 'hidden'
+                el.setAttribute('hidden', '')
                 el.remove()
             })
         }
