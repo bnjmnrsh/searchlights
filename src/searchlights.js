@@ -385,6 +385,7 @@ window.searchLights = (function (options) {
     ) {
         if (aSrchLtElsOpts.length) {
             // We have element options, so create them
+            const htmlTemp = document.createDocumentFragment()
             aSrchLtElsOpts.forEach(function (aSrchLtElsOpts) {
                 const nCanvas = document.createElement('canvas')
                 // Add classes
@@ -409,9 +410,13 @@ window.searchLights = (function (options) {
                         )
                     }
                 }
-                // Attach it to the DOM
-                sL._nSrchLtsParent ? sL._nSrchLtsParent.prepend(nCanvas) : ''
+                htmlTemp.prepend(nCanvas)
             })
+
+            // Attach it to the DOM
+            sL._data._nSrchLtsParent
+                ? sL._data._nSrchLtsParent.prepend(htmlTemp)
+                : ''
         }
         // refresh the nodeList of searchlight elements now in the DOM
         const nlAllSrcLtsEls = document.querySelectorAll(sTargetClass)
@@ -583,21 +588,22 @@ window.searchLights = (function (options) {
      */
     sL._build = function (els = sL._data._aDOMhadEls, nTarget = '') {
         if (els && els.length) {
-            // if we've been given a target use it, otherwise look for our custom property in node object
-
-            els.forEach(function (el, i) {
-                // hide it on first placement
-                el.setAttribute('hidden', '')
-
-                // have we been provided a target node?
-                if (_fnIsDOM(nTarget)) {
-                    els[i].nTarget.appendChild(el)
-
-                    // otherwise, do we have a custom srchLtParentNode?
-                } else if (_fnIsDOM(els[i].srchLtParentNode)) {
-                    els[i].srchLtParentNode.appendChild(el)
-                }
-            })
+            // have we been provided a target node?
+            if (_fnIsDOM(nTarget)) {
+                const htmlTemp = document.createDocumentFragment()
+                els.forEach(function (el, i) {
+                    els[i].htmlTemp.appendChild(el)
+                })
+                // this is more efficent for large numbers of elements...
+                nTarget.appendChild(htmlTemp)
+            } else {
+                // otherwise, do the els have a custom srchLtParentNode?
+                els.forEach(function (el, i) {
+                    if (_fnIsDOM(els[i].srchLtParentNode)) {
+                        els[i].srchLtParentNode.appendChild(el)
+                    }
+                })
+            }
         }
         return sL
     }
