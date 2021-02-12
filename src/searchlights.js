@@ -7,7 +7,7 @@
 window.searchLights = (function (options) {
     ;('use strict')
 
-    // Default element values
+    // * Default element values
     const _Defaults = {
         blur: 3,
         dia: 100,
@@ -50,26 +50,7 @@ window.searchLights = (function (options) {
         },
     ]
 
-    // * The public searchLights object
-    let sL = {}
-    // Default parent to attach searchLight elements to
-    sL.sParentEl = 'body'
-    // Default seachLight element class
-    sL.sTargetClass = '.searchlight'
-    // Prevent most inline styles on serchLight elements
-    sL.bUseInlineStyles = true
-    // Enables the hiding of searchLight elements when the pointer exits the parent El
-    sL.bEnableShowHide = true
-
-    // ! PRIVATE
-    // An array of captured srchLt DOM elements if they exsist on first load
-    sL._aDOMhadEls = []
-    //  A nodeList of current srchLt elemtnts
-    sL._nlSrchLtsEls
-    // The parent node where srchLts are appended
-    sL._nSrchLtsParent
-
-    // * Internal helper methods
+    // * Private internal helper methods
     /**
      * Test if provided element is a DOM node
      *
@@ -309,8 +290,28 @@ window.searchLights = (function (options) {
         }
     }
 
-    // searchLights Public API methods
+    // * The public searchLights object
+    let sL = {}
 
+    // Default parent to attach searchLight elements to
+    sL.sParentEl = 'body'
+    // Default seachLight element class
+    sL.sTargetClass = '.searchlight'
+    // Prevent most inline styles on serchLight elements
+    sL.bUseInlineStyles = true
+    // Enables the hiding of searchLight elements when the pointer exits the parent El
+    sL.bEnableShowHide = true
+
+    // * searchLight Private objects
+    sL._data = {}
+    // An array of captured srchLt DOM api elements if they exsist on first load
+    sL._data._aDOMhadEls = []
+    //  A nodeList of current srchLt elemtnts
+    sL._data._nlSrchLtsEls
+    // The srchLts parent node
+    sL._data._nSrchLtsParent
+
+    // * searchLights Public API methods
     sL.m = {}
 
     /**
