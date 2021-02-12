@@ -553,7 +553,6 @@ window.searchLights = (function (options) {
      */
     sL.m.fnEventsCreate = function () {
         const node = sL._data._nSrchLtsParent
-
         node.addEventListener('pointermove', _fnPointerFollow, false)
         node.addEventListener('pointerEnter', _fnPointerEnter, false)
         node.addEventListener('pointerleave', _fnPointerLeave, false)
@@ -566,7 +565,6 @@ window.searchLights = (function (options) {
     sL.m.fnEventsDestroy = function () {
         const node = sL._data._nSrchLtsParent
 
-        // Remove event listeners
         node.removeEventListener('pointermove', _fnPointerFollow, false)
         node.removeEventListener('pointerenter', _fnPointerEnter, false)
         node.removeEventListener('pointerleave', _fnPointerLeave, false)
@@ -578,9 +576,6 @@ window.searchLights = (function (options) {
      * Defaults to any previliously captured srcLt els
      * if a target node is provided it will append to it,
      * otherwise it will look for our custom node attribute el.srchLtParentNode
-     *
-     * TODO: There is a performace hit here, as we are adding each element to the DOM in a forEach
-     * * document.createDocumentFragment() would be a better approach if we could garuentee that each element had the same target
      *
      * @param {arrat} [els=sL._data._aDOMhadEls]
      * @param {string} [nTarget='']
