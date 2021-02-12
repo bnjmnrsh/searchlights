@@ -193,15 +193,15 @@ window.searchLights = (function (options) {
      * @param {event object} e
      */
     const _fnPointerFollow = function (e) {
-        sL.m.fnFollowPtr(e, sL._nlSrchLtsEls)
+        sL.m.fnFollowPtr(e, sL._data._nlSrchLtsEls)
         sL.fnPtrMoveCallbk(e, sL)
     }
     const _fnPointerEnter = function (e) {
-        sL.m.fnSrchLtElsShow(sL._nlSrchLtsEls, e, sL)
+        sL.m.fnSrchLtElsShow(sL._data._nlSrchLtsEls, e, sL)
         sL.fnPtrEnterCallbk(e, sL)
     }
     const _fnPointerLeave = function (e) {
-        sL.m.fnSrchLtElsHide(sL._nlSrchLtsEls, e, sL)
+        sL.m.fnSrchLtElsHide(sL._data._nlSrchLtsEls, e, sL)
         sL.fnPtrLeaveCallbk(e, sL)
     }
 
@@ -223,7 +223,7 @@ window.searchLights = (function (options) {
 
         // TODO cleanup
         if (
-            sL._aDOMhadEls.length &&
+            sL._data._aDOMhadEls.length &&
             oOptions &&
             oOptions.aSrchLtElsOpts === 'undefined'
         ) {
@@ -239,16 +239,16 @@ window.searchLights = (function (options) {
                 delete oDefaultsCopy.aSrchLtElsOpts
             }
 
-            if (!sL._aDOMhadEls.length) {
+            if (!sL._data._aDOMhadEls.length) {
                 // We've not been here before
                 // Turn the node list into an array
-                sL._aDOMhadEls = [...nlCurrentEls]
+                sL._data._aDOMhadEls = [...nlCurrentEls]
                 // Add our custom parentNode prop to each el,
                 // as el.parentNode is lost after removal from DOM
-                sL._aDOMhadEls.forEach(function (n, i) {
-                    n.srchLtParentNode = sL._aDOMhadEls[i].parentNode
+                sL._data._aDOMhadEls.forEach(function (n, i) {
+                    n.srchLtParentNode = sL._data._aDOMhadEls[i].parentNode
                     n.srchLtPeviousElementSibling =
-                        sL._aDOMhadEls[i].previousElementSibling
+                        sL._data._aDOMhadEls[i].previousElementSibling
                 })
             }
         }
@@ -271,21 +271,21 @@ window.searchLights = (function (options) {
         }
 
         // Now that we have set up Defaults, grab the parent to attach to
-        sL._nSrchLtsParent = document.querySelector(sL.sParentEl)
+        sL._data._nSrchLtsParent = document.querySelector(sL.sParentEl)
     }
 
     /**
      * Add searchLight elements to DOM, apply inline styles, and render the Context.
      */
     const _fnAssembleSrchLtEls = function () {
-        sL._nlSrchLtsEls = sL.m.fnCreateSrchLtEls(
+        sL._data._nlSrchLtsEls = sL.m.fnCreateSrchLtEls(
             sL.settings.aSrchLtElsOpts,
             sL.sTargetClass
         )
 
-        if (sL._nlSrchLtsEls) {
+        if (sL._data._nlSrchLtsEls) {
             // draw each element
-            sL._nlSrchLtsEls.forEach(function (el) {
+            sL._data._nlSrchLtsEls.forEach(function (el) {
                 if (!_fnIsDOM(el)) return
 
                 // create the 2d conext
@@ -542,11 +542,11 @@ window.searchLights = (function (options) {
     sL.fnPtrEnterCallbk = function () {}
 
     /**
-     * Sets up event listeners onto the sL._nSrchLtsParent element
+     * Sets up event listeners onto the sL._data._nSrchLtsParent element
      * TODO: Does this need to be public?
      */
     sL.m.fnEventsCreate = function () {
-        const node = sL._nSrchLtsParent
+        const node = sL._data._nSrchLtsParent
 
         node.addEventListener('pointermove', _fnPointerFollow, false)
         node.addEventListener('pointerEnter', _fnPointerEnter, false)
@@ -554,11 +554,11 @@ window.searchLights = (function (options) {
     }
 
     /**
-     * Destroy event listeners on the sL._nSrchLtsParent element
+     * Destroy event listeners on the sL._data._nSrchLtsParent element
      * TODO: Does this need to be public?
      */
     sL.m.fnEventsDestroy = function () {
-        const node = sL._nSrchLtsParent
+        const node = sL._data._nSrchLtsParent
 
         // Remove event listeners
         node.removeEventListener('pointermove', _fnPointerFollow, false)
@@ -576,11 +576,11 @@ window.searchLights = (function (options) {
      * TODO: There is a performace hit here, as we are adding each element to the DOM in a forEach
      * * document.createDocumentFragment() would be a better approach if we could garuentee that each element had the same target
      *
-     * @param {arrat} [els=sL._aDOMhadEls]
+     * @param {arrat} [els=sL._data._aDOMhadEls]
      * @param {string} [nTarget='']
      * @returns
      */
-    sL._build = function (els = sL._aDOMhadEls, nTarget = '') {
+    sL._build = function (els = sL._data._aDOMhadEls, nTarget = '') {
         if (els && els.length) {
             // if we've been given a target use it, otherwise look for our custom property in node object
 
@@ -615,8 +615,8 @@ window.searchLights = (function (options) {
 
         // Remove elements we built from Options and added to DOM
         // Not ALL srchLt elements that may have been on the DOM initially
-        if (sL._nlSrchLtsEls) {
-            sL._nlSrchLtsEls.forEach(function (el) {
+        if (sL._data._nlSrchLtsEls) {
+            sL._data._nlSrchLtsEls.forEach(function (el) {
                 el.setAttribute('hidden', '')
                 el.remove()
             })
@@ -625,9 +625,9 @@ window.searchLights = (function (options) {
         // Nuke run time objects: settings, nodeLists ect
         delete sL.options
         delete sL.settings
-        delete sL._nlSrchLtsEls
-        delete sL._nSrchLtsParent
-        // * sL._aDOMhadEls is not destroyed so that we have the option to _build() them in future.
+        delete sL._data._nlSrchLtsEls
+        delete sL._data._nSrchLtsParent
+        // * sL._data._aDOMhadEls is not destroyed so that we have the option to _build() them in future.
 
         // reset callbacks
         sL.fnPtrMoveCallbk = function () {}
