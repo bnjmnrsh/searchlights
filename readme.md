@@ -1,6 +1,8 @@
 # searchLights.js
 
-A fun little project to experiment with `mix-blend-mode` and drawing with `CanvasRenderingContext2D`. There are a number of project goals.
+A fun little project to experiment with `mix-blend-mode` and drawing with `CanvasRenderingContext2D`. 
+
+There were a number of project goals:
 
 1. The plugin should be 'plug and play' running out of the box with some fun defaults.
 2. These defaults should be able to be overwritten with user options provided by either
@@ -16,7 +18,7 @@ Fundamentally you can just plunk the `searchLights.js` script in the footer of y
 
 ```
 <script src="./searchLights.js" />
-<script>searchLights.init()</script>
+<script>searchLights._init()</script>
 ```
 
 ## Known accessibility issues
@@ -63,6 +65,15 @@ mix-blend-mode: unset;
 \* These values not supported in Safari, see [Browser Support]()
 
 ## Styles
+
+```
+.mix-blend-mode .searchlight {
+    position: absolute;
+    will-change: transform, opacity, left, top;
+    opacity: 0;
+    display: none;
+}
+```
 
 ## Configurations
 
@@ -144,7 +155,7 @@ Name | Value | Defaults | Description |
 
 ## Gotchas
 
--   When the `parentEl` is positioned, `relative`, `absolute` or `fixed`, there appears to be some drawing issues, where the upper left corner of the `.searchlight` elements are transparent (event with a background color), and the elements slightly offset. The result is that the pointer is not centred as expected, and some of the searchlight elements may be clipped. Early testing, this appears to be a Chrome bug, as safari and FF don't have the issue.
+-   Chrome: when attaching serachLight elements to targets other then the `<body>`, and the target, is positioned `relative`, `absolute` or `fixed`, there appears to be some drawing issues. The upper left corner of the `.searchlight` elements have transparent bites taken out of them (event when a `background-color` set in css), and the elements are slightly offset from center. The result is that the pointer is not centred as expected, and some of the searchlight elements may be clipped. Early testing, this appears to be a Chrome bug, as safari and FF don't have the issue.
 
 -   `CanvasRenderingContext2D.filter` is not currently supported in safari
     https://caniuse.com/?search=CanvasRenderingContext2D.filter
@@ -163,10 +174,15 @@ also ` will-change: transform;`
 
 ## Code Conventions
 
-Variable and function names are descriptive, using camelCase, and generally use [Hungarian Notation (adapted)](http://cws.cengage.co.uk/rautenbach/students/ancillary_content/hungarian_notation.pdf):
 
-| Prefix Code | Description |
-|-------------|-------------|
+**camelCase** 
+All functions and variables should be given descriptive camelCase names using Hungarian Notation.
+
+**Hungarian Notation**
+Variables and functions names should be prefixed with the following Hungarian notation codes:
+
+| Prefix      | Description |
+|:-----------:|-------------|
 |s            | String      |
 |b            | Boolean     |
 |f            | Float       |
@@ -176,8 +192,67 @@ Variable and function names are descriptive, using camelCase, and generally use 
 |fn           | Function or method |
 |n            | DOM node    |
 |nl           | DOM nodeList |
-|_            | Private variable or function |
+|_            | Treat as a private |
+|C            | Class name prefix |
 
-Notable exceptions are `searchLights._init()` and `searchLights._destroy()` methods, which are not prefixed with `fn`, and the `serchlights.options` parameters, which are not prefixed by datatype.  
+Notable exceptions are `searchLights._init()` and `searchLights._destroy()` methods, which are not prefixed with `fn`, and the `serchlights.options` and `serchlights.options`object parameters, which are not prefixed by datatype.  
+
+**Capitalisation:** `const` variables which should not be mutated directly are capitalised. Classe names are prefixed with a capital `C`
+
+## TO DO
+- [ ] Make adding ptrs to dom more efficient with an HTML Fragment (we can only do this when we are provided a target string in _build(), if we are not, then we resort to looking in the DOM elements them selves, to see if we previously saved a srchLtsParentElement. In fnCreateSrchLtEls(), we use the `settings`, or `_Default` so we are more effective with this technique. 
+
+- [ ] Revise docs. . . . 
+- [ ] Make sure we are not directly manipulating incoming params. . . objs & arrays
+- [ ] Better handling of pointers first appearance on screen (now they sit at 00 until pointer event.)
+- [ ] Consistently sanitise or parse every data-attr before it hits the DOM?
+- [ ] Consider a constructor to be able to create more then one.
+- [ ] onpointermove, vs onmousemove - onpointermove is janky on FF, but using onmousemove means that pointers aren't registered. Detect is user is using pointer?
+ 	- https://github.com/rafgraph/event-from, https://github.com/rafgraph/detect-it
+- [ ] On safari, the drawn borders are not blurred (no support) - fake it with drop shadow?
+- [ ] look at dynamically calling methods based on the data-* attr name. https://www.sitepoint.com/call-javascript-function-string-without-using-eval/
+	- This would be useful for regenerating new DOM elements based on existing data-* values. ie
+	- given data-opacity='.5' check if a method exists and if so run srchlte.opacity(el, .5)
+- [ ] add flag for the type of element to be made. Global? only or on a per element basis? hummmmm ie canvas or block....
+- [ ] consider being able to disable inline classes on a per element basis.
+- [ ] make sure that when adding elements to the DOM it is done in such a way as to minimise redraw/reflow
 
 
+**These might be best as an experiment in extending the plugin:**
+
+- [ ] Automatically calculate degrees of separation for n searchlights
+- [ ] Automatically calculate off centre separation of searchlights provided a distance value
+- [ ] Optionally be able to converge searchlights to 0 (cursor tip) after the cursor pauses
+
+**Completed**
+
+- [x] Make adding styles more efficient with classes where possible. (added hidden attr, not much else makes sense. 
+- [x] add z-index to list of params (in progress)
+- [x] Believe that the ctx element is not getting all the default values. line 441
+- [X] Bug with timing, being passed through as string, should be an int. (we turn it into a string anyway tho...)
+- [x] Hungarian notation (in progress) - http://cws.cengage.co.uk/rautenbach/students/ancillary_content/hungarian_notation.pdf
+- [x] BUG `_fnBuildOptionsObj()` method works, is not adding default els to DOM. ln 200
+- [x] FOUC - modify base styles to set to display none, visibility hidden, add a `_funSetVisibleDisplay()` method to make the el visible on load. Bonus points for using debounce to have `_fnSetOpacity` run after all the other styles are added for a fade in effect.  
+- [x] `_fnBuildOptionsObj` method should capture the DOM nodes that exists and store them for later.
+- [x] `_build()` method should take a list of nodes and attach them to the provided target element.
+- [x] Should _fnAssembleSrchLtEls begin with adding the style element to body? (prob not)
+- [x]  `_oSrchLtsParentNode rename to _nSrchLtsParentNode`
+- [x] Bug - calling `init({})` on searchLights when there were already elements in the DOM, does not redraw the default ones.... what is happening here? 
+- [x] Consider removing escape hatch if DOM elements already exists. This could prevent us from creating algorithmic configs in future.
+- [x] Assess if rather then tracking if the mouse leaves body to show/hide, instead if it leaves the 'attach' target with custom event? / changes made to srchLts.m.fnEventSetup
+- [x] Ensure that any provided options are dynamically turned into data-* attributes
+- [x] If we are inlining styes on the element, we should create the basic stylesheet on the fly.
+- [x] destroy method for cleanup . . .
+- [x] Be able to specify in options what element the pointers should be prepended to // done with 'attach' option
+- [x] Consider using a reference to the actual ptr DOM element computed width and height rather try to calculate centre settings.
+ * This will keep the pointer centred even if the values are changed with js later.
+- [x] refactor m.fnCreateSrchLtEls() to allow numeric 0 values from data-*
+- [x] refactor the merging of Defaults and options into the settings object.
+
+
+@wont Detect when the pointer is over an array of DOM elements and optionally hide the element.
+@wont convert nodeList.forEach() to Array.prototype.slice.call() for better backward compatibility, if we were to use this with (for example) just css or perhaps SVG approaches. (not needed according to CF)
+@wont Consider ways to adjust layering order. Is z-index easiest? // achievable with callback or event listener.
+@wont Optionally be able to shuffle or randomise the css transition value for each searchlight after cursor pause to make it behaviour less predictable // could be done with css and external js
+-->https://css-tricks.com/newsletter/236-initialisms-and-layout-shifts/ && https://imagineer.in/blog/stacking-context-with-opacity/
+@wont ::before ::after pseudo elements in order to transition blending mode on cursor stop? // could be achieved with css, so added flag to disable inline styles.
