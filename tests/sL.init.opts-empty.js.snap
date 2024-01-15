@@ -1,0 +1,165 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`_init() default output should return basic values 1`] = `
+Object {
+  "_aDOMhadEls": Array [],
+  "_build": [Function],
+  "_destroy": [Function],
+  "_init": [Function],
+  "_nSrchLtsParent": <body
+    class="mix-blend-mode"
+  >
+    <canvas
+      class="blue srchLts-def searchlight"
+      data-blend="screen"
+      data-blur="3"
+      data-color="rgb(0,0,255)"
+      data-dia="100"
+      data-opacity="0.8"
+      data-timing="475"
+      height="106"
+      style="transform: translate3d(-53px, -53px, 0px); mix-blend-mode: screen; transition-timing-function: ease-out; transition-duration: 475ms;"
+      width="106"
+    />
+    <canvas
+      class="green srchLts-def searchlight"
+      data-blend="screen"
+      data-blur="3"
+      data-color="rgb(0,255,0)"
+      data-dia="100"
+      data-opacity="0.8"
+      data-timing="425"
+      height="106"
+      style="transform: translate3d(-53px, -53px, 0px); mix-blend-mode: screen; transition-timing-function: ease-out; transition-duration: 425ms;"
+      width="106"
+    />
+    <canvas
+      class="red srchLts-def searchlight"
+      data-blend="screen"
+      data-blur="3"
+      data-color="rgb(255,0,0)"
+      data-dia="100"
+      data-opacity="0.8"
+      data-timing="400"
+      height="106"
+      style="transform: translate3d(-53px, -53px, 0px); mix-blend-mode: screen; transition-timing-function: ease-out; transition-duration: 400ms;"
+      width="106"
+    />
+    <div />
+  </body>,
+  "_nlSrchLtsEls": NodeList [
+    <canvas
+      class="blue srchLts-def searchlight"
+      data-blend="screen"
+      data-blur="3"
+      data-color="rgb(0,0,255)"
+      data-dia="100"
+      data-opacity="0.8"
+      data-timing="475"
+      height="106"
+      style="transform: translate3d(-53px, -53px, 0px); mix-blend-mode: screen; transition-timing-function: ease-out; transition-duration: 475ms;"
+      width="106"
+    />,
+    <canvas
+      class="green srchLts-def searchlight"
+      data-blend="screen"
+      data-blur="3"
+      data-color="rgb(0,255,0)"
+      data-dia="100"
+      data-opacity="0.8"
+      data-timing="425"
+      height="106"
+      style="transform: translate3d(-53px, -53px, 0px); mix-blend-mode: screen; transition-timing-function: ease-out; transition-duration: 425ms;"
+      width="106"
+    />,
+    <canvas
+      class="red srchLts-def searchlight"
+      data-blend="screen"
+      data-blur="3"
+      data-color="rgb(255,0,0)"
+      data-dia="100"
+      data-opacity="0.8"
+      data-timing="400"
+      height="106"
+      style="transform: translate3d(-53px, -53px, 0px); mix-blend-mode: screen; transition-timing-function: ease-out; transition-duration: 400ms;"
+      width="106"
+    />,
+  ],
+  "bEnableShowHide": true,
+  "bUseInlineStyles": true,
+  "fnPtrEnterCallbk": [Function],
+  "fnPtrLeaveCallbk": [Function],
+  "fnPtrMoveCallbk": [Function],
+  "m": Object {
+    "_fnDbnce": [Function],
+    "fnCenterOnPtr": [Function],
+    "fnCreateCtx": [Function],
+    "fnCreateSrchLtEls": [Function],
+    "fnDraw": [Function],
+    "fnEventsCreate": [Function],
+    "fnEventsDestroy": [Function],
+    "fnFollowPtr": [Function],
+    "fnSrchLtElsHide": [Function],
+    "fnSrchLtElsShow": [Function],
+    "fnStringifyClassArray": [Function],
+  },
+  "sParentEl": "body",
+  "sTargetClass": ".searchlight",
+  "settings": Object {
+    "aSrchLtElsOpts": Array [
+      Object {
+        "blend": "screen",
+        "blur": 3,
+        "classes": Array [
+          "red",
+          "srchLts-def",
+          "searchlight",
+          "searchlight",
+        ],
+        "color": "rgb(255,0,0)",
+        "dia": 100,
+        "opacity": 0.8,
+        "timing": 400,
+      },
+      Object {
+        "blend": "screen",
+        "blur": 3,
+        "classes": Array [
+          "green",
+          "srchLts-def",
+          "searchlight",
+          "searchlight",
+        ],
+        "color": "rgb(0,255,0)",
+        "dia": 100,
+        "opacity": 0.8,
+        "timing": 425,
+      },
+      Object {
+        "blend": "screen",
+        "blur": 3,
+        "classes": Array [
+          "blue",
+          "srchLts-def",
+          "searchlight",
+          "searchlight",
+        ],
+        "color": "rgb(0,0,255)",
+        "dia": 100,
+        "opacity": 0.8,
+        "timing": 475,
+      },
+    ],
+    "blend": "screen",
+    "blur": 3,
+    "color": undefined,
+    "dia": 100,
+    "easing": "ease-out",
+    "height": undefined,
+    "opacity": 0.8,
+    "timing": 90,
+    "width": undefined,
+    "zindex": 0,
+  },
+}
+`;
