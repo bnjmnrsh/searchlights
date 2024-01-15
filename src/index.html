@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="./styles.css" />
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <!-- <canvas
+            class="searchlight"
+            data-color="rgb(0,0,255)"
+            data-blend="exclusion"
+            data-dia="100"
+            data-blur="3"
+            easing="ease-out"
+            timing="900"
+        ></canvas> -->
+        <div class="content">
+            <h1>
+                <span>Chapter VI <br />At Full Steam</span>
+            </h1>
+            <p>
+                <span
+                    >At this cry the whole ship's crew hurried towards the
+                    harpooner—commander, officers, masters, sailors, cabin boys;
+                    even the engineers left their engines, and the stokers their
+                    furnaces.</span
+                >
+            </p>
+            <p>
+                <span
+                    >The order to stop her had been given, and the frigate now
+                    simply went on by her own momentum. The darkness was then
+                    profound, and, however good the Canadian's eyes were, I
+                    asked myself how he had managed to see, and what he had been
+                    able to see. My heart beat as if it would break. But Ned
+                    Land was not mistaken, and we all perceived the object he
+                    pointed to. At two cables' length from the Abraham Lincoln,
+                    on the starboard quarter, the sea seemed to be illuminated
+                    all over. It was not a mere phosphoric phenomenon. The
+                    monster emerged some fathoms from the water, and then threw
+                    out that very intense but mysterious light mentioned in the
+                    report of several captains. This magnificent irradiation
+                    must have been produced by an agent of great SHINING power.
+                    The luminous part traced on the sea an immense oval, much
+                    elongated, the centre of which condensed a burning heat,
+                    whose overpowering brilliancy died out by successive
+                    gradations.</span
+                >
+            </p>
+        </div>
+        <div id="background">
+            <div id="svg-mesh">
+                <svg width="100%" height="100%">
+                    <!-- Mask with slight gradient -->
+                    <mask maskUnits="userSpaceOnUse" id="fade">
+                        <!-- Here's that slight gradient -->
+                        <linearGradient
+                            id="gradient"
+                            x1="0"
+                            y1="0"
+                            x2="0"
+                            y2="100%"
+                        >
+                            <stop offset="0" style="stop-color: #ffffff"></stop>
+                            <stop offset="1" style="stop-color: #000000"></stop>
+                        </linearGradient>
+                        <!-- The canvas for our mask -->
+                        <rect
+                            fill="url(#gradient)"
+                            width="100%"
+                            height="100%"
+                        ></rect>
+                    </mask>
+                    <pattern
+                        id="pattern-circles"
+                        x="0"
+                        y="0"
+                        width="3"
+                        height="3"
+                        patternUnits="userSpaceOnUse"
+                    >
+                        <!-- Draw the circle, using `fill` in the CSS -->
+                        <circle mask="url(#fade)" cx="1" cy="1" r="1"></circle>
+                    </pattern>
+                    <!-- The canvas with our applied pattern -->
+                    <rect
+                        x="0"
+                        y="0"
+                        width="100%"
+                        height="100%"
+                        fill="url(#pattern-circles)"
+                    ></rect>
+                </svg>
+            </div>
+        </div>
+    </body>
+    <script src="searchlights.js"></script>
+    <script src="app.js"></script>
+</html>
