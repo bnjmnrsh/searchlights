@@ -4,9 +4,7 @@
  * @param {object} options
  * @returns {object} searchLights
  */
-window.searchLights = (function (options) {
-    ;('use strict')
-
+window.searchLights = function (options) {
     // * Default element values
     const _Defaults = {
         blur: 3,
@@ -610,14 +608,15 @@ window.searchLights = (function (options) {
      */
     sL._destroy = function () {
         // Make sure we have already been initialised
+
         if (!sL.settings) return
 
         // Remove event listeners
         sL.m.fnEventsDestroy()
-
         // Remove elements we built from Options and added to DOM
         // Not ALL srchLt elements that may have been on the DOM initially
         if (sL._data._nlSrchLtsEls) {
+            console.log('destroying')
             sL._data._nlSrchLtsEls.forEach(function (el) {
                 el.setAttribute('hidden', '')
                 el.remove()
@@ -670,9 +669,6 @@ window.searchLights = (function (options) {
         // return updated srchLts object
         return sL
     }
-
     // return public API
     return sL
-})()
-
-module.exports = window.searchLights
+}
