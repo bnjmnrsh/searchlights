@@ -2,16 +2,17 @@
     "name": "searchlights.js",
     "version": "0.0.1",
     "description": "A js plugin to turn your cursor into an array of searchlights.",
-    "main": "searchlights.js",
+    "source": "src/searchlights.js",
+    "main": "dist/searchlights.js",
     "scripts": {
-        "start": "parcel serve ./src/index.html",
-        "build": "parcel build ./src/index.html",
+        "watch": "parcel watch",
+        "build": "parcel build",
         "test-it": "test-it"
     },
-    "browserslist": "> 0.2%",
+    "browserslist": "> 0.5%, last 2 versions, not dead",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/bnjmnrsh/searchlights.js.git"
+        "url": "git+https://github.com/bnjmnrsh/searchlights.git"
     },
     "keywords": [
         "JavaScript",
@@ -20,9 +21,12 @@
     "author": "bnjmnrsh",
     "license": "WTFPL",
     "bugs": {
-        "url": "https://github.com/bnjmnrsh/searchlights.js/issues"
+        "url": "https://github.com/bnjmnrsh/searchlights/issues"
     },
-    "homepage": "https://github.com/bnjmnrsh/searchlights.js#readme",
+    "homepage": "https://github.com/bnjmnrsh/searchlights#readme",
+    "dependencies": {
+        "@swc/helpers": "^0.5.3"
+    },
     "devDependencies": {
         "@test-it/cli": "^0.6.6",
         "@test-it/core": "^0.6.6",
@@ -32,7 +36,7 @@
         "eslint-plugin-import": "^2.22.1",
         "eslint-plugin-node": "^11.1.0",
         "eslint-plugin-promise": "^4.2.1",
-        "parcel": "^2.0.0-nightly.540",
+        "parcel": "lastest",
         "prettier": "^2.2.1",
         "sass": "^1.32.4"
     }
