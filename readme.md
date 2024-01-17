@@ -2,10 +2,14 @@
 
 A fun little project to experiment with `mix-blend-mode` and drawing with `CanvasRenderingContext2D`.
 
+There are two demos on CodePen:
+ using [DOM `<canvas>` elements for configuration](https://codepen.io/bnjmnrsh/pen/XWGpaLV)
+ using [JavaScript Objects for configuration](https://codepen.io/bnjmnrsh/pen/eYXgGjL)
+
 There were a number of project goals:
 
 1. The plugin should be 'plug and play' running out of the box with some fun defaults.
-2. These defaults should be able to be overwritten with user options provided by either
+2. These defaults should be able to be overwritten with user options provided by either:
 
 -   The existence of DOM elements with the appropriate `class` and `data` attributes.
 -   or, programmatically, via a options object `searchLights({options})`.
@@ -14,7 +18,7 @@ There were a number of project goals:
 
 ## Basic Use
 
-Fundamentally you can just plunk the `searchLights.js` script in the footer of your doc. with an inline script instantiating the plugin.
+Fundamentally you can just plunk the `searchLights.js` script in the footer of your HTML with an inline script instantiating the plugin. (i.e. the script is an iife instantiated onto `window` - yolo. )
 
 ```
 <script src="./searchLights.js" />
