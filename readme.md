@@ -10,7 +10,7 @@ There were a number of project goals:
 -   The existence of DOM elements with the appropriate `class` and `data` attributes.
 -   or, programmatically, via a options object `searchLights({options})`.
 
-3. The plugin should be extendable via custom events, callbacks, and or by overwriting the public API methods with your own to modify functionality.
+3. The plugin should be extendable via custom events, callbacks, and or by overwriting the public methods with your own to modify functionality.
 
 ## Basic Use
 
@@ -27,7 +27,7 @@ The elements added by `searchLight()` (such as `<canvas>`), when tied to pointer
 
 ## Browser Support
 
-`searchlights.js` will test the browser on instantiation adding the class `mix-blend-mode`. If the browser doesn't report support, the scrip will exit silently.
+`searchlights.js` will test the browser on instantiation adding the class `mix-blend-mode`. If the browser doesn't report support, the script will exit silently.
 
 > Note: Safari has partial support, and will return true, though some modes not supported, including: hue, saturation, color, and luminosity
 
