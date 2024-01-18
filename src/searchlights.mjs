@@ -588,7 +588,7 @@ export default function searchLights(options = {}) {
      * if a target node is provided it will append to it,
      * otherwise it will look for our custom node attribute el.srchLtParentNode
      *
-     * @param {arrat} [els=sL._data._aDOMhadEls]
+     * @param {array} [els=sL._data._aDOMhadEls]
      * @param {string} [nTarget='']
      * @returns
      */
@@ -623,13 +623,11 @@ export default function searchLights(options = {}) {
         // Make sure we have already been initialised
 
         if (!sL.settings) return
-
         // Remove event listeners
         sL.m.fnEventsDestroy()
         // Remove elements we built from Options and added to DOM
-        // Not ALL srchLt elements that may have been on the DOM initially
+        // Not ALL srchLt elements may have been on the DOM initially
         if (sL._data._nlSrchLtsEls) {
-            console.log('destroying')
             sL._data._nlSrchLtsEls.forEach(function (el) {
                 el.setAttribute('hidden', '')
                 el.remove()
