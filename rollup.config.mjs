@@ -7,7 +7,7 @@ const pkg = JSON.parse(
 // Configs
 const configs = {
     name: pkg.name,
-    files: ['searchlights.js'],
+    files: ['searchlights.js', 'searchlights.mjs'],
     formats: ['iife'], //, 'es', 'amd', 'cjs'
     default: 'iife',
     pathIn: 'src/',
@@ -35,6 +35,12 @@ const createOutput = function (filename, minify) {
         if (format === 'iife') {
             output.name = configs.name ? configs.name : pkg.name
             output.name = output.name.trim().replace(/\W+/g, '_')
+        }
+        // A quick intervention for our one mjs file.
+        if (filename.includes('.mjs')) {
+            minify = false
+            output.format = 'es'
+            output.file = `${configs.pathOut}/${filename}`
         }
         if (minify) {
             output.plugins = [terser()]
@@ -66,6 +72,8 @@ const createOutputs = function (filename) {
 
 /**
  * Create export object
+ *
+ * @param {*} file
  * @return {Array} The export object
  */
 const createExport = function (file) {
