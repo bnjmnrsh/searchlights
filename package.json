@@ -1,12 +1,14 @@
 {
     "name": "searchlights.js",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "A js plugin to turn your cursor into an array of searchlights.",
     "source": "src/searchlights.js",
     "main": "dist/searchlights.js",
     "scripts": {
         "build": "rollup -c",
-        "help": "rollup --help"
+        "help": "rollup --help",
+        "test": "vitest --coverage --pool=forks",
+        "update-tests": "vitest -u --coverage --pool=forks"
     },
     "browserslist": "> 0.5%, last 2 versions, not dead",
     "repository": {
@@ -21,21 +23,25 @@
         "name": "bnjmnrsh",
         "website": "https://github.com/bnjmnrsh/searchlights"
     },
-    "license": "WTFPL",
+    "license": "MIT",
     "bugs": {
         "url": "https://github.com/bnjmnrsh/searchlights/issues"
     },
     "homepage": "https://github.com/bnjmnrsh/searchlights#readme",
     "devDependencies": {
         "@rollup/plugin-terser": "^0.4.4",
+        "@vitest/coverage-v8": "^1.2.1",
+        "canvas": "^2.11.2",
         "eslint": "^7.18.0",
         "eslint-config-prettier": "^7.2.0",
         "eslint-config-standard": "^16.0.2",
         "eslint-plugin-import": "^2.22.1",
         "eslint-plugin-node": "^11.1.0",
         "eslint-plugin-promise": "^4.2.1",
+        "jsdom": "^23.2.0",
         "prettier": "^2.2.1",
         "rollup": "^4.9.5",
-        "rollup-plugin-banner": "^0.2.1"
+        "rollup-plugin-banner": "^0.2.1",
+        "vitest": "^1.2.1"
     }
 }
