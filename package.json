@@ -7,8 +7,8 @@
     "scripts": {
         "build": "rollup -c",
         "help": "rollup --help",
-        "test": "vitest --coverage",
-        "update-tests": "vitest -u --coverage"
+        "test": "vitest --coverage --pool=forks",
+        "update-tests": "vitest -u --coverage --pool=forks"
     },
     "browserslist": "> 0.5%, last 2 versions, not dead",
     "repository": {
